@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="45dp"
+    android:layout_gravity="center_horizontal"
+    android:background="@color/colorPrimary"
+    android:gravity="center_horizontal">
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/start_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:drawableEnd="@drawable/arrow_down_white_solid"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        tool:text="2020-01-01 08" />
+
+
+    <TextView
+        android:id="@+id/until_name_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"
+        android:text="@string/until_name"
+        android:textColor="@color/white"
+        android:textSize="16sp" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/end_time_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_vertical"
+        android:drawableEnd="@drawable/arrow_down_white_solid"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        tool:text="2020-01-01 20" />
+</LinearLayout>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <declare-styleable name="EditBorderLayout">
+        <!--边框颜色-->
+        <attr name="boxStrokeColor" format="reference|color" />
+        <!--边框宽度-->
+        <attr name="boxStrokeWidth" format="dimension" />
+        <!--边框错误颜色-->
+        <attr name="boxStrokeErrorColor" format="reference|color" />
+        <!--边框焦点颜色-->
+        <attr name="boxStrokeFocusedColor" format="reference|color" />
+        <!--边框圆角-->
+        <attr name="boxCornerRadius" format="dimension" />
+        <!--文本-->
+        <attr name="text" format="string" />
+        <!--文本大小-->
+        <attr name="textSize" format="dimension" />
+        <!--文本颜色-->
+        <attr name="textColor" format="reference|color" />
+        <!--文本最大行数-->
+        <attr name="textMaxLines" format="integer" />
+        <!--文本内边距-->
+        <attr name="textPaddingStart" format="dimension" />
+        <!--文本内边距-->
+        <attr name="textPaddingTop" format="dimension" />
+        <!--文本内边距-->
+        <attr name="textPaddingEnd" format="dimension" />
+        <!--文本内边距-->
+        <attr name="textPaddingBottom" format="dimension" />
+        <!--提示文字-->
+        <attr name="hintText" format="string" />
+        <!--不可用状态及提示文字颜色-->
+        <attr name="hintUnEnableColor" format="reference|color" />
+        <!--错误文字-->
+        <attr name="errorText" format="string" />
+        <!--错误文字颜色-->
+        <attr name="errorColor" format="reference|color" />
+        <!--是否可编辑-->
+        <attr name="editable" format="boolean" />
+        <!--是否启用-->
+        <attr name="enabled" format="boolean" />
+    </declare-styleable>
+</resources>

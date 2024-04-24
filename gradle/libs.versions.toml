@@ -1,0 +1,53 @@
+[versions]
+agp = "8.3.2"
+#junit test
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+#kotlin
+kotlin = "1.9.0"
+#ktx
+coreKtx = "1.10.1"
+#appcompat
+appcompat = "1.6.1"
+#material
+material = "1.10.0"
+#Autosize
+autosize = "v1.2.1"
+#BaseRecyclerViewAdapterHelper
+adapterHelper = "3.0.14"
+#pickerView
+pickerView = "4.1.9"
+#androidChart
+androidChart = "v3.1.0"
+
+
+#-------------------------------------------libraries-----------------------------------------------
+[libraries]
+#junit
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+#ktx
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+#appcompat
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+#material
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
+#第三方库
+#Autosize{https://github.com/JessYanCoding/AndroidAutoSize}
+autoSize = { group = "com.github.JessYanCoding", name = "AndroidAutoSize", version.ref = "autosize" }
+#BaseRecyclerViewAdapterHelper{https://github.com/cymchad/BaseRecyclerViewAdapterHelper}
+adapterHelper = { group = "io.github.cymchad", name = "BaseRecyclerViewAdapterHelper", version.ref = "adapterHelper" }
+#Android-PickerView{https://github.com/contrarywind/Android-PickerView}
+pickerView = { group = "com.contrarywind", name = "Android-PickerView", version.ref = "pickerView" }
+#MPAndroidChart{https://github.com/PhilJay/MPAndroidChart}
+androidChart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "androidChart" }
+
+
+#--------------------------------------------plugins------------------------------------------------
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+
