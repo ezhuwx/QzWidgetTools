@@ -6,6 +6,8 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 #kotlin
 kotlin = "1.9.0"
+#MavenPublish
+mavenPublish="0.28.0"
 #ktx
 coreKtx = "1.10.1"
 #appcompat
@@ -51,4 +53,4 @@ androidChart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibiary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
