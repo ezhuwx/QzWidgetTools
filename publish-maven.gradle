@@ -52,7 +52,7 @@ mavenPublishing {
             developerConnection = 'https://gitee.com/ezhuwx/qz-widget-tools.git'
         }
         //发布到Maven中央仓库
-        publishToMavenCentral(SonatypeHostMavenCentral)
+        publishToMavenCentral(SonatypeHostMavenCentral,true)
         //发布到本地
         publishToMavenLocal
         //签名

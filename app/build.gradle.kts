@@ -11,7 +11,7 @@ plugins {
 android {
     namespace = "com.ez.widget"
     compileSdk = 34
-    version = "1.0.1.02"
+    version = "1.0.1.11"
     defaultConfig {
         //applicationId = "com.ez.widget"
         minSdk = 24
@@ -65,11 +65,11 @@ dependencies {
     //自适应布局
     api(libs.autoSize)
     //RecyclerViewAdapter
-    implementation(libs.adapterHelper)
+    api(libs.adapterHelper)
     //日期选择
-    implementation(libs.pickerView)
+    api(libs.pickerView)
     //图表
-    implementation(libs.androidChart)
+    api(libs.androidChart)
 }
 //maven publish id
 ext {
