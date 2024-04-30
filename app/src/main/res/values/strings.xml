@@ -11,4 +11,6 @@
     <string name="confirm">确定</string>
     <string name="empty_data">暂无数据</string>
     <string name="until_name">至</string>
+    <string name="sel_all">全选</string>
+    <string name="clear">清空</string>
 </resources>
