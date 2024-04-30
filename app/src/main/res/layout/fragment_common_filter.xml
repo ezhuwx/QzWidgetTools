@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="280dp"
     android:layout_height="match_parent"
     android:background="#f5f5f5">
 
@@ -44,8 +45,8 @@
             android:layout_marginBottom="1dp"
             android:padding="10dp"
             android:text="@string/app_name"
-            android:textSize="14sp"
             android:textColor="@color/black"
+            android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/top_item_cb"
@@ -98,21 +99,41 @@
         android:layout_alignParentBottom="true" />
 
     <TextView
+        android:id="@+id/sel_all_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:layout_above="@+id/bottom_v"
+        android:layout_marginStart="20dp"
+        android:layout_marginBottom="30dp"
+        android:background="@drawable/circle_gray_solid_bg"
+        android:elevation="3dp"
+        android:gravity="center"
+        android:maxLines="1"
+        android:paddingHorizontal="20dp"
+        android:text="@string/sel_all"
+        android:textColor="@color/colorPrimary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <TextView
         android:id="@+id/confirm_tv"
         android:layout_width="match_parent"
         android:layout_height="32dp"
         android:layout_above="@+id/bottom_v"
-        android:layout_marginStart="35dp"
-        android:layout_marginEnd="35dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginBottom="30dp"
+        android:layout_toEndOf="@+id/sel_all_tv"
         android:background="@drawable/circle_solid_blue_bg"
-        android:elevation="5dp"
+        android:elevation="3dp"
         android:gravity="center"
         android:maxLines="1"
         android:text="@string/confirm"
         android:textColor="@color/white"
         android:textSize="14sp"
-        android:visibility="gone" />
+        android:visibility="gone"
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/loading_pb"
