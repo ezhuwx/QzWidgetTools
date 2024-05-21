@@ -26,9 +26,9 @@ object FastClickUtil {
      */
     @JvmStatic
     fun isNotFastClick(view: View, minInterval: Long): Boolean {
-        val preTime = view.getTag(R.id.last_click_time) as Long
+        val preTime = view.getTag(R.id.last_click_time) as Long?
         val currentTime = System.currentTimeMillis()
-        val timeInterval = currentTime - preTime
+        val timeInterval = currentTime - (preTime ?: 0)
         if (timeInterval < minInterval) {
             return false
         }

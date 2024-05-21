@@ -1,6 +1,7 @@
 package com.qz.widget.filter.slide
 
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.FlowCollector
+
 
 /**
  * @author : ezhuwx
@@ -9,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
  * E-mail : ezhuwx@163.com
  * Update on 16:42 by ezhuwx
  */
+
 interface RequestEngine {
 
     fun onRequestData(
@@ -16,7 +18,8 @@ interface RequestEngine {
         params: MutableMap<String?, String>?,
         parentId: String?,
         parentIdParamName: String?,
-        isChild: Boolean
-    ): MutableLiveData<Pair<MutableList<FilterData>?, Boolean>>
+        isChild: Boolean,
+        collector:  FlowCollector<Pair<MutableList<FilterData>?, Boolean>>
+    )
 
 }

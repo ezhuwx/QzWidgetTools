@@ -172,6 +172,12 @@ class SingleSelManager(
         return this
     }
 
+    fun url(url: String): RequestManager {
+        configuration.isLocalData = false
+        requestManager.url = url
+        return requestManager
+    }
+
     fun url(
         url: String,
         engine: RequestEngine,
@@ -181,6 +187,7 @@ class SingleSelManager(
         requestManager.requestEngine = engine
         return requestManager
     }
+
 
     fun localData(
         localData: MutableList<FilterData>?,
