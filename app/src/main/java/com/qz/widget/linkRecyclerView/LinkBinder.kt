@@ -20,10 +20,18 @@ interface LinkBinder<T, VH : BaseViewHolder?, H : LinkHeaderView?> {
      *
      * @return 重新设置头部数据
      */
-    fun onReBuildHeader() {
+    fun onReBuildHeaderData() {
         linkAdapter.headerData = onBuildHeader()
     }
-
+    /**
+     * 配置头
+     *
+     * @return 重新设置头部数据
+     */
+    fun onReBuildHeader() {
+        onReBuildHeaderData()
+        linkAdapter.onRebuildHeader()
+    }
     /**
      * 配置头
      *

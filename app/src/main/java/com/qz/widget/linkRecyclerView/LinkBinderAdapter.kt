@@ -134,6 +134,14 @@ class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
     }
 
     /**
+     * 重新构建头
+     */
+    fun onRebuildHeader() {
+        headerHsv.adapter = null
+        initHeader(headerHsv.context)
+    }
+
+    /**
      * 初始化头
      */
     private fun initFooter(context: Context) {

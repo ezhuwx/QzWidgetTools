@@ -67,6 +67,9 @@ class RequestManager(
      */
     var onMultiLevelMultiSelListener: OnMultiLevelMultiSelListener? = null
 
+    init {
+        requestEngine = RequestEngineManager.instance.getGlobalFilterRequestEngine()
+    }
 
     /**
      * 获取筛选数据
@@ -89,13 +92,13 @@ class RequestManager(
             requestParams.putAll(it)
         }
         //请求
-        requestEngine?.onRequestData(
+        requestEngine!!.onRequestData(
             url,
             requestParams,
             parentId,
             parentIdParamName,
             isChild
-        )?.observe(filterInstance) { (dataList, isChildRequest) ->
+        ) { (dataList, isChildRequest) ->
             dataList?.let { data ->
                 //结果处理
                 val parseData = onResultParseListener?.onResultParse(data) ?: data
@@ -120,7 +123,11 @@ class RequestManager(
     /**
      * 数据配置
      */
-    private fun onBuildData(dataList: MutableList<FilterData>?, parentId: String?, isChild: Boolean) {
+    private fun onBuildData(
+        dataList: MutableList<FilterData>?,
+        parentId: String?,
+        isChild: Boolean
+    ) {
         onBuildDataListener?.onBuildData(dataList, parentId, isChild)
     }
 

@@ -376,6 +376,12 @@ class MultiSelManager(
         return this
     }
 
+    fun url(url: String): RequestManager {
+        configuration.isLocalData = false
+        requestManager.url = url
+        return requestManager
+    }
+
     fun url(url: String, engine: RequestEngine): RequestManager {
         configuration.isLocalData = false
         requestManager.url = url
