@@ -10,14 +10,18 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
+import android.text.Editable
 import android.text.InputType
+import android.text.method.DigitsKeyListener
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.annotation.StringRes
+import androidx.core.widget.addTextChangedListener
 import com.qz.widget.R
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
@@ -29,7 +33,111 @@ import kotlin.random.Random
  * E-mail : ezhuwx@163.com
  * Update on 9:23 by ezhuwx
  */
-class EditBorderLayout : RelativeLayout {
+
+class EditBorderLayout(
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0,
+    /**
+     * 边框颜色
+     */
+    private var boxStrokeColor: Int = Color.parseColor("#999999"),
+
+    /**
+     * 边框宽度 px
+     */
+    private var boxStrokeWidth: Float = 3f,
+    /**
+     * 边框焦点颜色
+     */
+    private var boxStrokeFocusedColor: Int = Color.parseColor("#2269d3"),
+    /**
+     * 边框圆角
+     */
+    private var boxCornerRadius: Float = 15f,
+    /**
+     * 文字
+     */
+    private var textStr: String? = "",
+    /**
+     * 文字大小 px
+     */
+    private var textStrSize: Float = 36f,
+    /**
+     * 提示文字与文字间距
+     */
+    private var tipInterval: Float = 9f,
+    /**
+     * 文字颜色
+     */
+    private var textStrColor: Int = Color.parseColor("#2269d3"),
+    /**
+     * 文字最大行数
+     */
+    private var textMaxLines: Int = 1,
+    /**
+     * 提示文字
+     */
+    private var hintStr: String? = "",
+    /**
+     * 提示文字颜色
+     */
+    private var hintUnEnabledColor: Int = Color.parseColor("#90000000"),
+    /**
+     * 错误文字
+     */
+    private var errorStr: String? = "",
+    /**
+     * 错误颜色
+     */
+    private var errorColor: Int = Color.parseColor("#DC143C"),
+    /**
+     * 文字左边距 px
+     */
+    private var textPaddingStart: Float = 30f,
+    /**
+     * 文字上边距 px
+     */
+    private var textPaddingTop: Float = 30f,
+    /**
+     * 文字右边距 px
+     */
+    private var textPaddingEnd: Float = 30f,
+    /**
+     * 文字下边距 px
+     */
+    private var textPaddingBottom: Float = 30f,
+
+    /**
+     * 是否可编辑
+     */
+    private var isEditable: Boolean = true,
+
+    /**
+     * 是否启用
+     */
+    private var isEnabled: Boolean = true,
+
+    /**
+     * 输入类型
+     */
+    private var inputType: Int = EditorInfo.TYPE_CLASS_TEXT,
+    /**
+     * 键盘类型
+     */
+    private var imeOptions: Int = EditorInfo.IME_ACTION_NEXT,
+
+    /**
+     * 输入长度
+     */
+    private var maxEms: Int = Int.MAX_VALUE,
+    /**
+     * 输入字符
+     */
+    private var digits: String? = null,
+    /**
+     * 输入监听
+     */
+    private var onTextChanged: ((Editable?) -> Unit)? = null
+) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes) {
     private var editView: EditText? = null
     private var textView: TextView? = null
     private var hintView: TextView? = null
@@ -40,108 +148,20 @@ class EditBorderLayout : RelativeLayout {
     private var isBorderInit = AtomicBoolean(false)
     private val viewId = Random.nextInt(100000000, 999999999)
 
-    /**
-     * 边框颜色
-     */
-    private var boxStrokeColor = Color.parseColor("#999999")
 
-    /**
-     * 边框宽度 px
-     */
-    private var boxStrokeWidth = 3f
+    constructor(context: Context) : this(
+        context, null, 0, 0,
+    )
 
-    /**
-     * 边框焦点颜色
-     */
-    private var boxStrokeFocusedColor = Color.parseColor("#2269d3")
+    constructor(context: Context, attrs: AttributeSet) : this(
+        context, attrs, 0, 0,
+    )
 
-    /**
-     * 边框圆角
-     */
-    private var boxCornerRadius = 15f
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : this(
+        context, attrs, defStyleAttr, 0,
+    )
 
-    /**
-     * 文字
-     */
-    private var textStr: String? = ""
-
-    /**
-     * 文字大小 px
-     */
-    private var textStrSize = 36f
-
-    /**
-     * 提示文字与文字间距
-     */
-    private var tipInterval = 9f
-
-    /**
-     * 文字颜色
-     */
-    private var textStrColor = Color.parseColor("#2269d3")
-
-    /**
-     * 文字最大行数
-     */
-    private var textMaxLines = 1
-
-    /**
-     * 提示文字
-     */
-    private var hintStr: String? = ""
-
-    /**
-     * 提示文字颜色
-     */
-    private var hintUnEnabledColor = Color.parseColor("#90000000")
-
-    /**
-     * 错误文字
-     */
-    private var errorStr: String? = ""
-
-    /**
-     * 错误颜色
-     */
-    private var errorColor = Color.parseColor("#DC143C")
-
-    /**
-     * 文字左边距 px
-     */
-    private var textPaddingStart = 30f
-
-    /**
-     * 文字上边距 px
-     */
-    private var textPaddingTop = 30f
-
-    /**
-     * 文字右边距 px
-     */
-    private var textPaddingEnd = 30f
-
-    /**
-     * 文字下边距 px
-     */
-    private var textPaddingBottom = 30f
-
-    /**
-     * 是否可编辑
-     */
-    private var isEditable = true
-
-    /**
-     * 是否启用
-     */
-    private var isEnabled = true
-
-    constructor(context: Context) : this(context, null)
-
-    constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
-        context, attrs, defStyleAttr
-    ) {
+    init {
         setWillNotDraw(false)
         initAttrs(context, attrs, defStyleAttr)
     }
@@ -173,7 +193,7 @@ class EditBorderLayout : RelativeLayout {
         )
         //文字
         //输入框文字
-        textStr = typedArray.getString(R.styleable.EditBorderLayout_text)
+        textStr = typedArray.getString(R.styleable.EditBorderLayout_text) ?: textStr
         //输入框文字颜色
         textStrColor = typedArray.getColor(R.styleable.EditBorderLayout_textColor, textStrColor)
         //输入框文字大小
@@ -181,6 +201,20 @@ class EditBorderLayout : RelativeLayout {
         //输入框文字最大行数
         textMaxLines = typedArray.getInteger(
             R.styleable.EditBorderLayout_textMaxLines, textMaxLines
+        )
+        //输入长度
+        maxEms = typedArray.getInteger(
+            R.styleable.EditBorderLayout_maxEms, maxEms
+        )
+        //输入类型
+        inputType = typedArray.getInteger(
+            R.styleable.EditBorderLayout_android_inputType, inputType
+        )
+        //输入字符
+        digits = typedArray.getString(R.styleable.EditBorderLayout_android_digits) ?: digits
+        //键盘类型
+        imeOptions = typedArray.getInteger(
+            R.styleable.EditBorderLayout_android_imeOptions, imeOptions
         )
         //输入框文字内边距
         textPaddingStart = typedArray.getDimension(
@@ -201,24 +235,24 @@ class EditBorderLayout : RelativeLayout {
         //提示文字
         hintStr = typedArray.getString(
             R.styleable.EditBorderLayout_hintText,
-        )
+        ) ?: hintStr
         //提示文字颜色
         hintUnEnabledColor = typedArray.getColor(
             R.styleable.EditBorderLayout_hintUnEnableColor, hintUnEnabledColor
         )
         //错误文字
-        errorStr = typedArray.getString(R.styleable.EditBorderLayout_errorText)
+        errorStr = typedArray.getString(R.styleable.EditBorderLayout_errorText) ?: errorStr
         //错误颜色
         errorColor = typedArray.getColor(
             R.styleable.EditBorderLayout_errorColor, errorColor
         )
         //是否可编辑
         isEditable = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_editable, true
+            R.styleable.EditBorderLayout_editable, isEditable
         )
         //是否启用
         isEnabled = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_enabled, true
+            R.styleable.EditBorderLayout_enabled, isEnabled
         )
         typedArray.recycle()
         //边框画笔
@@ -232,8 +266,6 @@ class EditBorderLayout : RelativeLayout {
         if (isEditable) initEditView()
         //初始化文本
         else initTextView()
-        //提示文字上移
-        if (!textStr.isNullOrEmpty()) onHintTranslation(true)
         //状态配置
         onBuildEnabledColor(isEnabled)
     }
@@ -338,6 +370,10 @@ class EditBorderLayout : RelativeLayout {
         layoutParams.addRule(CENTER_HORIZONTAL)
         layoutParams.addRule(ALIGN_BASELINE, viewId)
         addView(hintView, layoutParams)
+        hintView?.post {
+            //提示文字上移
+            if (!textStr.isNullOrEmpty()) onHintTranslation(true)
+        }
     }
 
     /**
@@ -351,11 +387,19 @@ class EditBorderLayout : RelativeLayout {
             setTextColor(textStrColor)
             setSelection(textStr?.length ?: 0)
             setTextSize(TypedValue.COMPLEX_UNIT_PX, textStrSize)
+            //输入长度
+            maxEms = this@EditBorderLayout.maxEms
+            //输入字符
+            if (digits != null) keyListener = DigitsKeyListener.getInstance(digits!!)
+            //键盘类型
+            imeOptions = this@EditBorderLayout.imeOptions
             //最大行数
             maxLines = textMaxLines
-            if (maxLines > 1) {
-                setInputType(InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE)
-            } else setInputType(InputType.TYPE_CLASS_TEXT)
+            inputType = if (maxLines > 1) {
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+            } else InputType.TYPE_CLASS_TEXT
+            //输入类型
+            inputType = this@EditBorderLayout.inputType
             //边距
             setPadding(
                 textPaddingStart.toInt(),
@@ -371,6 +415,7 @@ class EditBorderLayout : RelativeLayout {
                 borderPaint.color = if (hasFocus) boxStrokeFocusedColor else boxStrokeColor
                 buildBorder(hasFocus)
             }
+            onTextChanged?.let { addTextChangedListener(afterTextChanged = it) }
         }
         //添加到父布局
         val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
@@ -435,7 +480,7 @@ class EditBorderLayout : RelativeLayout {
         val translationY =
             height - textPaddingTop - textStrSize / 2 - textPaddingBottom - tipInterval
         hintView?.animate()?.run {
-            setDuration(100)
+            duration = 100
             translationY(if (isMoveUp) -translationY else 0f).start()
         }
     }
@@ -496,5 +541,13 @@ class EditBorderLayout : RelativeLayout {
         super.setEnabled(isEnabled)
         if (isEditable) editView?.isEnabled = isEnabled else textView?.isEnabled = isEnabled
         borderPaint.color = if (isEnabled) boxStrokeColor else Color.parseColor("#E3E3E3")
+    }
+
+    /**
+     * 设置输入监听
+     */
+    fun onSetTextWatcher(onTextChanged: (Editable?) -> Unit) {
+        this.onTextChanged = onTextChanged
+        editView?.addTextChangedListener(afterTextChanged = onTextChanged)
     }
 }
