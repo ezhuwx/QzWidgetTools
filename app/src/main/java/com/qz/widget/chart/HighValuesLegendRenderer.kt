@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.github.mikephil.charting.animation.ChartAnimator
+import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider
 import com.github.mikephil.charting.renderer.LineChartRenderer
@@ -35,26 +36,21 @@ class HighValuesLegendRenderer(
 
     override fun drawHighlighted(c: Canvas, indices: Array<Highlight>) {
         val lineData = mChart.lineData
-        var text: String
-        var localX: Float
-        var localY: Float
         for (high in indices) {
             val set = lineData.getDataSetByIndex(high.dataSetIndex)
             if (set == null || !set.isHighlightEnabled) {
                 continue
             }
-            val e = set.getEntryForXValue(high.x, high.y)
-            if (!isInBoundsX(e, set)) {
+            val entry = set.getEntryForXValue(high.x, high.y)
+            val entryIndex = set.getEntryIndex(entry)
+            if (!isInBoundsX(entry, set)) {
                 continue
             }
-            localX = e.x
-            localY = e.y
             //x
             val xAxis = (mChart as HighValuesLineCart).xAxis
-            val xValue = xAxis.valueFormatter.getFormattedValue(localX)
+            val xValue = xAxis.valueFormatter.getFormattedValue(entry.x)
             val pix = mChart.getTransformer(set.axisDependency).getPixelForValues(
-                localX,
-                localY * mAnimator.phaseY
+                entry.x, entry.y * mAnimator.phaseY
             )
             //高亮线
             high.setDraw(pix.x.toFloat(), pix.y.toFloat())
@@ -62,7 +58,7 @@ class HighValuesLegendRenderer(
             //回调或绘制
             if (onHighLightChangeListener == null) {
                 textPaint.color = set.highLightColor
-                text = String.format(Locale.CHINA, "(%s，%s：%.3f)", xValue, set.label, localY)
+                val text = String.format(Locale.CHINA, "(%s，%s：%.3f)", xValue, set.label, entry.y)
                 //文字位置
                 if (pix.x < mViewPortHandler.contentRight() - textPaint.measureText(text)) {
                     c.drawText(
@@ -78,7 +74,7 @@ class HighValuesLegendRenderer(
                     )
                 }
             } else {
-                onHighLightChangeListener!!.onChange(localX)
+                onHighLightChangeListener!!.onChange(entry, entryIndex, high.dataSetIndex)
             }
             // draw the lines
             drawHighlightLines(c, pix.x.toFloat(), pix.y.toFloat(), set)
@@ -91,5 +87,12 @@ class HighValuesLegendRenderer(
          * @param x x轴坐标
          */
         fun onChange(x: Float)
+
+        /**
+         * @param x x轴坐标
+         */
+        fun onChange(x: Entry, entryIndex: Int, setIndex: Int) {
+            onChange(x.x)
+        }
     }
 }
