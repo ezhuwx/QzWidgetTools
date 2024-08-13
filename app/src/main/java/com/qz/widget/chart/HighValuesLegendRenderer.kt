@@ -4,12 +4,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import com.github.mikephil.charting.animation.ChartAnimator
+import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.dataprovider.LineDataProvider
 import com.github.mikephil.charting.renderer.LineChartRenderer
 import com.github.mikephil.charting.utils.ViewPortHandler
-import java.util.*
+import java.util.Locale
+import kotlin.math.absoluteValue
 
 /**
  * @author : ezhuwx
@@ -25,13 +27,14 @@ class HighValuesLegendRenderer(
     viewPortHandler: ViewPortHandler?
 ) : LineChartRenderer(chart, animator, viewPortHandler) {
     private val textPaint: Paint = Paint(Paint.LINEAR_TEXT_FLAG)
-    private val textSize = 48f
+    private val textSize = 36f
     var onHighLightChangeListener: OnHighLightChangeListener? = null
 
     init {
         textPaint.style = Paint.Style.FILL
         textPaint.color = Color.BLACK
         textPaint.textSize = textSize
+        textPaint.isAntiAlias = true
     }
 
     override fun drawHighlighted(c: Canvas, indices: Array<Highlight>) {
@@ -47,7 +50,7 @@ class HighValuesLegendRenderer(
                 continue
             }
             //x
-            val xAxis = (mChart as HighValuesLineCart).xAxis
+            val xAxis = (mChart as BarLineChartBase<*>).xAxis
             val xValue = xAxis.valueFormatter.getFormattedValue(entry.x)
             val pix = mChart.getTransformer(set.axisDependency).getPixelForValues(
                 entry.x, entry.y * mAnimator.phaseY
@@ -59,18 +62,45 @@ class HighValuesLegendRenderer(
             if (onHighLightChangeListener == null) {
                 textPaint.color = set.highLightColor
                 val text = String.format(Locale.CHINA, "(%s，%s：%.3f)", xValue, set.label, entry.y)
+                //垂直居中
+                var centerVerticalY =
+                    mViewPortHandler.contentBottom() - mViewPortHandler.contentTop()
+                centerVerticalY = mViewPortHandler.contentTop() + centerVerticalY.absoluteValue / 2f
+                //水平居中
+                var centerHorizontalX =
+                    mViewPortHandler.contentRight() - mViewPortHandler.contentLeft()
+                centerHorizontalX =
+                    mViewPortHandler.contentLeft() + centerHorizontalX.absoluteValue / 2f
+                //文字绘制起始X坐标
+                var drawStart = pix.x.toFloat()
+                //文字宽度
+                val textWidthHalf = textPaint.measureText(text) / 2
                 //文字位置
-                if (pix.x < mViewPortHandler.contentRight() - textPaint.measureText(text)) {
+                if (drawStart < centerHorizontalX) {
+                    val left = drawStart - mViewPortHandler.contentLeft()
+                    if (textWidthHalf > left) {
+                        drawStart = mViewPortHandler.contentLeft()
+                    } else {
+                        drawStart -= textWidthHalf
+                    }
                     c.drawText(
                         text,
-                        pix.x.toFloat() + 10,
-                        mViewPortHandler.contentTop() + textSize,
+                        drawStart + 10,
+                        centerVerticalY + textSize,
                         textPaint
                     )
                 } else {
+                    val right = mViewPortHandler.contentRight() - drawStart
+                    if (textWidthHalf > right) {
+                        drawStart = mViewPortHandler.contentRight() - textWidthHalf * 2
+                    } else {
+                        drawStart -= textWidthHalf
+                    }
                     c.drawText(
-                        text, pix.x.toFloat() - textPaint.measureText(text) - 10,
-                        mViewPortHandler.contentTop() + textSize, textPaint
+                        text,
+                        drawStart - 10,
+                        centerVerticalY + textSize,
+                        textPaint
                     )
                 }
             } else {

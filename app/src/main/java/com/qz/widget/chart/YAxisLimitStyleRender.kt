@@ -2,8 +2,12 @@ package com.qz.widget.chart
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
 import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet
 import com.github.mikephil.charting.renderer.YAxisRenderer
 import com.github.mikephil.charting.utils.Utils
 
@@ -14,7 +18,10 @@ import com.github.mikephil.charting.utils.Utils
  * E-mail : ezhuwx@163.com
  * Update on 11:19 by ezhuwx
  */
-class YAxisLimitStyleRender(mLineChart: HighValuesLineCart, yAxis: YAxis) : YAxisRenderer(
+class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleData<out IBarLineScatterCandleBubbleDataSet<out Entry>>>>(
+    mLineChart: C,
+    yAxis: YAxis
+) : YAxisRenderer(
     mLineChart.viewPortHandler,
     yAxis,
     mLineChart.getTransformer(yAxis.axisDependency)
