@@ -58,7 +58,7 @@ class FilterRadioButton : RadioButton {
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        initStyle(context)
+        initStyle(context, attrs)
     }
 
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
@@ -66,13 +66,13 @@ class FilterRadioButton : RadioButton {
         attrs,
         defStyleAttr
     ) {
-        initStyle(context)
+        initStyle(context, attrs)
     }
 
     /**
      * 初始化样式
      */
-    private fun initStyle(context: Context) {
+    private fun initStyle(context: Context, attrs: AttributeSet? = null) {
         this.context = context
         //默认图文间距
         defaultDrawablePadding = AutoSizeUtils.dp2px(context, 10f)
@@ -95,7 +95,12 @@ class FilterRadioButton : RadioButton {
         //默认图标字体间隔10dp
         compoundDrawablePadding = defaultDrawablePadding
         //白底圆角小背景（xml可设置阴影边框）
-        setBackgroundResource(R.drawable.small_white_corner_bg)
+        val background = attrs?.getAttributeResourceValue(
+            "http://schemas.android.com/apk/res/android",
+            "background", R.drawable.small_white_corner_bg
+        ) ?: R.drawable.small_white_corner_bg
+        //白底圆角小背景（xml可设置阴影边框）
+        setBackgroundResource(background)
     }
 
     override fun setText(text: CharSequence, type: BufferType) {

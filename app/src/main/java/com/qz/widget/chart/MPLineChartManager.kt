@@ -2,31 +2,41 @@ package com.qz.widget.chart
 
 import android.content.Context
 import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.Typeface
 import androidx.annotation.ColorInt
 import com.qz.widget.R
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.BarLineChartBase
+import com.github.mikephil.charting.charts.Chart
+import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.*
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
+import com.github.mikephil.charting.model.GradientColor
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import kotlin.collections.ArrayList
 
+typealias BarLineData = BarLineScatterCandleBubbleData<out IBarLineScatterCandleBubbleDataSet<out Entry>>
 
 /**
  * 通用初始化
  */
-fun HighValuesLineCart.commonInit(
+fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     left: Float = 40f, top: Float = 30f,
     right: Float = 40f, bottom: Float = 40f,
     isLegend: Boolean = true,
     desStr: String = "",
+    drawAxisLine: Boolean = true,
+    drawGridLine: Boolean = false,
+    drawGridDashedLine: Boolean = false,
 ) {
     //设置描述信息
     description = Description().apply { text = desStr }
@@ -44,22 +54,26 @@ fun HighValuesLineCart.commonInit(
     //交互
     setInteraction()
     //x轴
-    setXAxis()
+    setXAxis(drawAxisLine, drawGridLine, drawGridDashedLine)
 }
 
 /**
  * 设置X轴
  */
-fun HighValuesLineCart.setXAxis(): XAxis {
+fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
+    drawAxisLine: Boolean = true,
+    drawGridLine: Boolean = false,
+    drawGridDashedLine: Boolean = false,
+): XAxis {
     return xAxis.apply {
         isEnabled = true //设置轴启用或禁用 如果禁用以下的设置全部不生效
         axisLineColor = Color.GRAY
         textSize = 8f
         axisLineWidth = 1f
         //设置x轴上每个点对应的线
-        setDrawGridLines(false)
+        setDrawGridLines(drawGridLine || drawGridDashedLine)
         //设置竖线的显示样式为虚线：lineLength控制虚线段的长度，spaceLength控制线之间的空间
-        enableGridDashedLine(10f, Color.BLACK.toFloat(), 0f)
+        if (drawGridDashedLine) enableGridDashedLine(20f, 40f, 0f)
         //绘制标签x轴上的对应数值
         setDrawLabels(true)
         //设置x轴的显示位置
@@ -71,7 +85,7 @@ fun HighValuesLineCart.setXAxis(): XAxis {
         //设置x轴标签的旋转角度
         labelRotationAngle = 0f
         //是否绘制X轴的网格线
-        setDrawAxisLine(true)
+        setDrawAxisLine(drawAxisLine)
         spaceMax = 0.5f
         setLabelCount(6, true)
     }
@@ -83,7 +97,10 @@ fun HighValuesLineCart.setXAxis(): XAxis {
  * @param lineList 限制线列表
  * @param gdl      虚线设置
  */
-fun HighValuesLineCart.setYLeftAndLimit(lineList: List<LimitLine>, gdl: Float = 0f): YAxis {
+fun <T : BarLineData> BarLineChartBase<T>.setYLeftAndLimit(
+    lineList: List<LimitLine>,
+    gdl: Float = 0f,
+): YAxis {
     //重置所有限制线,以避免重叠线
     return axisLeft.apply {
         removeAllLimitLines()
@@ -101,11 +118,11 @@ fun HighValuesLineCart.setYLeftAndLimit(lineList: List<LimitLine>, gdl: Float = 
 /**
  * 添加限制线
  */
-fun HighValuesLineCart.addLimit(
+fun <T : BarLineData> BarLineChartBase<T>.addLimit(
     value: Float, label: String, @ColorInt color: Int, yAxis: YAxis,
     position: LimitLine.LimitLabelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP,
     lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
-    lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f
+    lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
 ) {
     //添加限制线
     yAxis.addLimitLine(LimitStyleLine(value, label).apply {
@@ -120,11 +137,11 @@ fun HighValuesLineCart.addLimit(
 }
 
 
-fun HighValuesLineCart.setYRightAndLimit(
+fun <T : BarLineData> BarLineChartBase<T>.setYRightAndLimit(
     lineList: List<LimitLine?>,
     gdl: Float = 0f,
     space: Float = 0f,
-    phase: Float = 0f
+    phase: Float = 0f,
 ): YAxis {
     return axisRight.apply {
         //重置所有限制线,以避免重叠线
@@ -141,7 +158,7 @@ fun HighValuesLineCart.setYRightAndLimit(
 /**
  * 设置与图表交互
  */
-fun HighValuesLineCart.setInteraction() {
+fun <T : BarLineData> BarLineChartBase<T>.setInteraction() {
     // 设置是否可以触摸
     setTouchEnabled(true)
     // 是否可以拖拽
@@ -167,7 +184,7 @@ fun HighValuesLineCart.setInteraction() {
 /**
  * 设置图例
  */
-fun HighValuesLineCart.setLegend(): Legend {
+fun <T : BarLineData> BarLineChartBase<T>.setLegend(): Legend {
     return legend.apply {
         verticalAlignment = Legend.LegendVerticalAlignment.TOP
         horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
@@ -195,16 +212,13 @@ fun HighValuesLineCart.setLegend(): Legend {
  * @param title  标题
  * @param lineColor  颜色
  */
-fun HighValuesLineCart.buildSet(
+fun Chart<*>.buildSet(
     values: List<Entry>,
     title: String?,
     lineColor: Int,
     isDashed: Boolean = false,
-    axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT
+    axis: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
 ): LineDataSet {
-    //Y轴标签颜色
-    if (axis == YAxis.AxisDependency.LEFT) axisLeft.textColor = lineColor
-    else axisRight.textColor = lineColor
     // 创建一个数据
     return LineDataSet(values, title).apply {
         axisDependency = axis
@@ -227,8 +241,6 @@ fun HighValuesLineCart.buildSet(
         highlightLineWidth = 2f
         //是否禁用点击高亮线
         isHighlightEnabled = true
-        //是否禁用点击高亮线
-        isHighlightEnabled = true
         //设置点击交点后显示交高亮线的颜色
         highLightColor = Color.BLACK
         //点击后的高亮线的显示样式
@@ -247,7 +259,9 @@ fun HighValuesLineCart.buildSet(
  * 是否显示顶点值
  *
  */
-fun HighValuesLineCart.changeTheVerValue(isDrawValue: Boolean) {
+fun <T : BarLineData> BarLineChartBase<T>.changeTheVerValue(
+    isDrawValue: Boolean,
+) {
     //获取到当前值
     data.dataSets.forEach {
         (it as LineDataSet).setDrawValues(isDrawValue)
@@ -260,7 +274,9 @@ fun HighValuesLineCart.changeTheVerValue(isDrawValue: Boolean) {
  * 是否填充
  *
  */
-fun HighValuesLineCart.changeFilled(isFilled: Boolean) {
+fun <T : BarLineData> BarLineChartBase<T>.changeFilled(
+    isFilled: Boolean,
+) {
     data.dataSets.forEach {
         (it as LineDataSet).setDrawFilled(isFilled)
     }
@@ -271,7 +287,9 @@ fun HighValuesLineCart.changeFilled(isFilled: Boolean) {
  * 是否显示圆点
  *
  */
-fun HighValuesLineCart.changeTheVerCircle(isDrawCircle: Boolean) {
+fun <T : BarLineData> BarLineChartBase<T>.changeTheVerCircle(
+    isDrawCircle: Boolean,
+) {
     data.dataSets.forEach {
         (it as LineDataSet).setDrawCircles(isDrawCircle)
     }
@@ -282,7 +300,9 @@ fun HighValuesLineCart.changeTheVerCircle(isDrawCircle: Boolean) {
  * 切换立方
  *
  */
-fun HighValuesLineCart.changeMode(mode: LineDataSet.Mode) {
+fun <T : BarLineData> BarLineChartBase<T>.changeMode(
+    mode: LineDataSet.Mode,
+) {
     data.dataSets.forEach {
         (it as LineDataSet).mode = mode
     }
@@ -292,7 +312,7 @@ fun HighValuesLineCart.changeMode(mode: LineDataSet.Mode) {
 /**
  * Y轴刻度计算
  */
-fun HighValuesLineCart.setYAxis(
+fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     leftMin: Float,
     leftMax: Float,
     rightMin: Float? = null,
@@ -301,13 +321,24 @@ fun HighValuesLineCart.setYAxis(
     rightNegativeEnable: Boolean = false,
     leftMiniUnit: Float? = null,
     rightMiniUnit: Float? = null,
+    isLeftInverted: Boolean = false,
+    isRightInverted: Boolean = false,
     @ColorInt leftColor: Int? = null,
     @ColorInt rightColor: Int? = null,
+    drawLeftAxisLine: Boolean = true,
+    drawLeftGridLine: Boolean = false,
+    drawLeftGridDashedLine: Boolean = true,
+    drawRightAxisLine: Boolean = true,
+    drawRightGridLine: Boolean = false,
+    drawRightGridDashedLine: Boolean = false,
+    labelCount: Int = 6,
+    isForceLabelCount: Boolean = true,
 ) {
     //左边y轴峰谷计算
     val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit)
     //设置左边y轴
     axisLeft.run {
+        setDrawAxisLine(false)
         axisLineWidth = 1f
         //设置最小值
         axisMinimum = if (leftTicks.first >= 0 || leftNegativeEnable) leftTicks.first else 0f
@@ -318,12 +349,17 @@ fun HighValuesLineCart.setYAxis(
         zeroLineColor = Color.BLACK
         zeroLineWidth = 0.5f
         leftColor?.let { textColor = it }
-        //是否绘制网格
-        setDrawGridLines(false)
         setDrawTopYLabelEntry(true)
+        //是否绘制网格
+        if (drawLeftGridDashedLine) setGridDashedLine(DashPathEffect(floatArrayOf(20f, 20f), 0f))
+        setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
+        setDrawAxisLine(drawLeftAxisLine)
         //等间距
         isGranularityEnabled = false
-        setLabelCount(6, true)
+        setLabelCount(labelCount, isForceLabelCount)
+        //坐标轴反转
+        isInverted = isLeftInverted
+
     }
     rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
     //右边y轴峰谷计算
@@ -342,16 +378,26 @@ fun HighValuesLineCart.setYAxis(
             zeroLineColor = Color.BLACK
             zeroLineWidth = 0.5f
             rightColor?.let { textColor = it }
-            //是否绘制网格
-            setDrawGridLines(false)
             setDrawTopYLabelEntry(true)
+            //是否绘制网格
+            if (drawRightGridDashedLine) setGridDashedLine(
+                DashPathEffect(
+                    floatArrayOf(10f, 10f),
+                    0f
+                )
+            )
+            setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
+            setDrawAxisLine(drawRightAxisLine)
             //等间距
             isGranularityEnabled = false
-            setLabelCount(6, true)
+            setLabelCount(labelCount, isForceLabelCount)
+            //坐标轴反转
+            isInverted = isRightInverted
         }
         rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
     }
 }
+
 
 /**
  * 标准刷新
@@ -366,10 +412,20 @@ fun HighValuesLineCart.refresh(sets: List<LineDataSet>, duration: Int? = null) {
 /**
  * 标准刷新
  */
-fun HighValuesLineCart.xFormat(
+fun HighValuesCombinedChart.refresh(combinedData: CombinedData, duration: Int? = null) {
+    //刷新
+    data = combinedData
+    //动画
+    duration?.let { animateX(it) }
+}
+
+/**
+ * 标准刷新
+ */
+fun <T : BarLineData> BarLineChartBase<T>.xFormat(
     format: SimpleDateFormat? = null,
     newFormat: SimpleDateFormat? = null,
-    xFormat: (index: Float) -> String?
+    xFormat: (index: Float) -> String?,
 ) {
     xAxis.valueFormatter = object : ValueFormatter() {
         override fun getFormattedValue(value: Float): String {
@@ -389,7 +445,7 @@ fun HighValuesLineCart.xFormat(
 private fun formatterDate(
     tm: String,
     format: SimpleDateFormat,
-    newFormat: SimpleDateFormat? = null
+    newFormat: SimpleDateFormat? = null,
 ): String {
     var tmStr = tm
     newFormat?.let {
@@ -439,7 +495,7 @@ fun PieChart.initPieChart(context: Context) {
  */
 fun PieChart.setTotalData(
     name: String, data1: Pair<Float, Int>, data2: Pair<Float, Int>,
-    valueFormat: (Float) -> String
+    valueFormat: (Float) -> String,
 ) {
     val yValues = ArrayList<PieEntry>()
     //是否绘制PieChart内部中心文本
@@ -493,11 +549,22 @@ fun BarChart.initBarChart(
     top: Float = 0f,
     right: Float = 30f,
     bottom: Float = 0f,
+    isLegendEnabled: Boolean = true,
     xLabelSel: (Int) -> String,
     xSubLabelSel: ((Int) -> String)? = null,
     xColorSel: (Int) -> Int,
-    onValueSel: (Int) -> Unit,
+    onValueSel: ((Int) -> Unit)? = null,
+    drawLeftAxisLine: Boolean = false,
+    drawLeftAxisLabels: Boolean = false,
+    drawLeftGridLine: Boolean = false,
+    drawLeftGridDashedLine: Boolean = false,
+    drawRightAxisLine: Boolean = false,
+    drawRightAxisLabels: Boolean = false,
+    drawRightGridLine: Boolean = false,
+    drawRightGridDashedLine: Boolean = false,
 ) {
+    //图例
+    legend.isEnabled = isLegendEnabled
     //设置x轴标签
     if (this is XAxisSetHorizontalBarChart) setXAis(LabelSetXAxis())
     //x轴渲染器
@@ -516,15 +583,24 @@ fun BarChart.initBarChart(
     setScaleEnabled(false)
     // 改变y标签的位置
     val leftAxis: YAxis = axisLeft
-    leftAxis.setDrawGridLines(false)
-    leftAxis.setDrawAxisLine(false)
+    leftAxis.setDrawAxisLine(drawLeftAxisLine)
+    leftAxis.setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
+    if (drawLeftGridDashedLine) leftAxis.enableGridDashedLine(20f, 40f, 0f)
     leftAxis.axisMinimum = 0f
     leftAxis.spaceTop = 25f
-    leftAxis.setDrawLabels(false)
+    leftAxis.setDrawLabels(drawLeftAxisLabels)
     //右y轴不显示
-    axisRight.isEnabled = false
+    // 改变y标签的位置
+    val rightAxis: YAxis = axisRight
+    rightAxis.setDrawAxisLine(drawRightAxisLine)
+    rightAxis.setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
+    if (drawRightGridDashedLine) rightAxis.enableGridDashedLine(20f, 40f, 0f)
+    rightAxis.axisMinimum = 0f
+    rightAxis.spaceTop = 25f
+    rightAxis.setDrawLabels(drawRightAxisLabels)
     //设置x坐标轴显示位置在下方
     xAxis.position = XAxis.XAxisPosition.BOTTOM
+    xAxis.setDrawAxisLine(true)
     //将X轴的值显示在中央
     xAxis.setCenterAxisLabels(true)
     xAxis.valueFormatter = object : ColorByValueFormatter() {
@@ -555,7 +631,7 @@ fun BarChart.initBarChart(
             val entry = e as BarEntry
             if (entry.y > 0) {
                 val index = entry.x.toInt()
-                onValueSel(index)
+                onValueSel?.invoke(index)
             }
         }
 
@@ -577,7 +653,43 @@ fun <T> BarChart.setBarChartData(
     dataFormatter: (T) -> MutableList<Float?>,
     valueFormatter: (Float, Int) -> String,
     xValueColorFormatter: (Float) -> Int,
+    yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
+    gradientColor: GradientColor? = null,
+    xAxis: XAxis? = null,
+    isDrawValue: Boolean = true,
+    isDrawValueAboveBar: Boolean = true,
 ) {
+    val buildData = buildBarChartData(
+        legends,
+        dataList,
+        dataFormatter,
+        valueFormatter,
+        xValueColorFormatter,
+        xAxis = xAxis,
+        yAxisDependency = yAxisDependency,
+        gradientColor = gradientColor,
+        isDrawValue = isDrawValue,
+        isDrawValueAboveBar = isDrawValueAboveBar,
+    )
+    data = buildData
+    setDrawBarShadow(true)
+    setFitBars(true)
+    invalidate()
+    animateXY(500, 500)
+}
+
+fun <T> Chart<*>.buildBarChartData(
+    legends: MutableList<Pair<String?, Int>>,
+    dataList: MutableList<T>,
+    dataFormatter: (T) -> MutableList<Float?>,
+    valueFormatter: (Float, Int) -> String,
+    xValueColorFormatter: (Float) -> Int,
+    yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
+    gradientColor: GradientColor? = null,
+    xAxis: XAxis? = null,
+    isDrawValue: Boolean = true,
+    isDrawValueAboveBar: Boolean = true,
+): BarData {
     val dataValuesList = arrayListOf<ArrayList<BarEntry>>()
     val valueColors = arrayListOf<Int>()
     val dataValues = MutableList(legends.size) { arrayListOf<BarEntry>() }
@@ -599,15 +711,16 @@ fun <T> BarChart.setBarChartData(
     dataValuesList.forEachIndexed { index, values ->
         val legend = legends[index]
         val dataBarSet = BarDataSet(values, legend.first)
+        dataBarSet.axisDependency = yAxisDependency
         dataBarSet.barShadowColor = legend.second.withAlpha(2)
         dataBarSet.color = legend.second
+        gradientColor?.run { dataBarSet.setGradientColor(startColor, endColor) } ?: {
+            dataBarSet.color = legend.second
+        }
         dataSets.add(dataBarSet)
     }
     //显示设置
     val data = BarData(dataSets)
-    xAxis.setLabelCount(dataList.size, false)
-    xAxis.axisMaximum = dataList.size.toFloat()
-    setDrawBarShadow(true)
     //需要显示柱状图的类别 数量
     val barAmount = dataSets.size
     //设置组间距占比30%
@@ -619,14 +732,19 @@ fun <T> BarChart.setBarChartData(
     //(起始点、柱状图组间距、柱状图之间间距)
     if (barAmount > 1) {
         data.groupBars(0f, groupSpace, barSpace)
+        xAxis?.setLabelCount(dataList.size, false)
+        xAxis?.axisMaximum = dataList.size.toFloat()
     } else {
-        if (xAxis is LabelSetXAxis) (xAxis as LabelSetXAxis).fixedLabelCount = dataList.size
-        else xAxis.labelCount = dataList.size
-        xAxis.setCenterAxisLabels(false)
-        xAxis.granularity = 1f
+        xAxis?.granularity = 1f
+        xAxis?.setCenterAxisLabels(false)
+        xAxis?.setAxisMinimum(-0.5f)
+        xAxis?.setAxisMaximum(dataList.size.toFloat() - 0.5f)
     }
+    if (xAxis is LabelSetXAxis) xAxis.fixedLabelCount = dataList.size
     data.setValueTextColors(valueColors)
     data.setValueTextSize(8f)
+    data.setDrawValues(isDrawValue)
+    if (this is BarChart) setDrawValueAboveBar(isDrawValueAboveBar)
     data.setValueFormatter(object : ColorByValueFormatter() {
         var index = 0
         override fun getBarLabel(barEntry: BarEntry): String {
@@ -642,10 +760,7 @@ fun <T> BarChart.setBarChartData(
             return xValueColorFormatter(value)
         }
     })
-    this.data = data
-    setFitBars(true)
-    invalidate()
-    animateXY(500, 500)
+    return data
 }
 
 
@@ -653,25 +768,33 @@ fun <T> BarChart.setBarChartData(
  * 设置柱状图数据
  */
 fun <T> BarChart.setChartStackData(
-    legend: Pair<String?, Int>,
-    legend2: Pair<String?, Int>,
-    dataList: MutableList<T>,
-    dataFormatter: (T) -> Pair<Float, Float>,
+    legends: List<Pair<String?, Int>>,
+    dataList: List<T>,
+    dataFormatter: (T) -> List<Float>,
     valueFormatter: (Float, Int, Int) -> String,
+    isDrawValue: Boolean = true,
+    valueColor: Int = Color.BLACK,
+    isDrawValueAboveBar: Boolean = true,
+    yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
+    enableShadow: Boolean = true,
 ) {
+    //数据配置
     val dataValues = ArrayList<BarEntry>()
     val valueColors = ArrayList<Int>()
     //设置y轴显示的数据
     for ((index, data) in dataList.withIndex()) {
-        val (data1, data2) = dataFormatter(data)
-        dataValues.add(BarEntry(index.toFloat(), floatArrayOf(data1, data2)))
+        dataValues.add(BarEntry(index.toFloat(), dataFormatter(data).toFloatArray()))
     }
     val dataSets = ArrayList<IBarDataSet>()
     val dataBarSet = BarDataSet(dataValues, "")
-    dataBarSet.stackLabels = arrayOf(legend.first, legend2.first)
-    dataBarSet.barShadowColor = Color.parseColor("#05007eff")
-    dataBarSet.colors = arrayListOf(legend.second, legend2.second)
-    valueColors.add(Color.RED)
+    dataBarSet.axisDependency = yAxisDependency
+    dataBarSet.stackLabels = legends.map { it.first }.toTypedArray()
+    dataBarSet.colors = legends.map { it.second }
+    //点击背景色
+    dataBarSet.barShadowColor =
+        if (enableShadow) legends.first().second.withAlpha(2) else Color.TRANSPARENT
+    //值颜色
+    valueColors.add(valueColor)
     dataBarSet.setValueTextColors(valueColors)
     dataSets.add(dataBarSet)
     //显示设置
@@ -684,7 +807,10 @@ fun <T> BarChart.setChartStackData(
     setXAxisRenderer(XAxisHorizontalColorRenderer(this))
     //设置柱状图宽度
     data.barWidth = 0.8f
+    //是否显示柱状图值
     data.setValueTextSize(8f)
+    data.setDrawValues(isDrawValue)
+    setDrawValueAboveBar(isDrawValueAboveBar)
     data.setValueFormatter(object : ValueFormatter() {
         var dataIndex = 0
         var labelIndex = 0
@@ -699,6 +825,7 @@ fun <T> BarChart.setChartStackData(
             return valueFormatter(value, dataIndex, labelIndex)
         }
     })
+    //设置Y轴
     this.data = data
     setFitBars(true)
     invalidate()
