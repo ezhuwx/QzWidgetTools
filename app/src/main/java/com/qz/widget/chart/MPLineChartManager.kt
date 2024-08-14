@@ -5,24 +5,37 @@ import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Typeface
 import androidx.annotation.ColorInt
-import com.qz.widget.R
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.charts.Chart
-import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.charts.PieChart
-import com.github.mikephil.charting.components.*
-import com.github.mikephil.charting.data.*
+import com.github.mikephil.charting.components.AxisBase
+import com.github.mikephil.charting.components.Description
+import com.github.mikephil.charting.components.Legend
+import com.github.mikephil.charting.components.LimitLine
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.components.YAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData
+import com.github.mikephil.charting.data.CombinedData
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.github.mikephil.charting.highlight.Highlight
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
 import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.model.GradientColor
+import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import kotlin.collections.ArrayList
 
 typealias BarLineData = BarLineScatterCandleBubbleData<out IBarLineScatterCandleBubbleDataSet<out Entry>>
 
@@ -32,6 +45,7 @@ typealias BarLineData = BarLineScatterCandleBubbleData<out IBarLineScatterCandle
 fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     left: Float = 40f, top: Float = 30f,
     right: Float = 40f, bottom: Float = 40f,
+    extraTop: Float = 10f,
     isLegend: Boolean = true,
     desStr: String = "",
     drawAxisLine: Boolean = true,
@@ -49,6 +63,7 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
         AutoSizeUtils.dp2px(context, right).toFloat(),
         AutoSizeUtils.dp2px(context, bottom).toFloat()
     )
+    extraTopOffset = extraTop
     //图例
     if (isLegend) setLegend() else legend.isEnabled = false
     //交互
@@ -57,103 +72,6 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     setXAxis(drawAxisLine, drawGridLine, drawGridDashedLine)
 }
 
-/**
- * 设置X轴
- */
-fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
-    drawAxisLine: Boolean = true,
-    drawGridLine: Boolean = false,
-    drawGridDashedLine: Boolean = false,
-): XAxis {
-    return xAxis.apply {
-        isEnabled = true //设置轴启用或禁用 如果禁用以下的设置全部不生效
-        axisLineColor = Color.GRAY
-        textSize = 8f
-        axisLineWidth = 1f
-        //设置x轴上每个点对应的线
-        setDrawGridLines(drawGridLine || drawGridDashedLine)
-        //设置竖线的显示样式为虚线：lineLength控制虚线段的长度，spaceLength控制线之间的空间
-        if (drawGridDashedLine) enableGridDashedLine(20f, 40f, 0f)
-        //绘制标签x轴上的对应数值
-        setDrawLabels(true)
-        //设置x轴的显示位置
-        position = XAxis.XAxisPosition.BOTTOM
-        //设置字体颜色
-        textColor = Color.BLACK
-        //图表将避免第一个和最后一个标签条目被减掉在图表或屏幕的边缘
-        setAvoidFirstLastClipping(true)
-        //设置x轴标签的旋转角度
-        labelRotationAngle = 0f
-        //是否绘制X轴的网格线
-        setDrawAxisLine(drawAxisLine)
-        spaceMax = 0.5f
-        setLabelCount(6, true)
-    }
-}
-
-/**
- * 设置Y轴
- *
- * @param lineList 限制线列表
- * @param gdl      虚线设置
- */
-fun <T : BarLineData> BarLineChartBase<T>.setYLeftAndLimit(
-    lineList: List<LimitLine>,
-    gdl: Float = 0f,
-): YAxis {
-    //重置所有限制线,以避免重叠线
-    return axisLeft.apply {
-        removeAllLimitLines()
-        //网格线
-        enableGridDashedLine(gdl, gdl, 0f)
-        //是否绘制0所在的网格线
-        setDrawLimitLinesBehindData(true)
-        //设置限制线
-        for (item in lineList) {
-            addLimitLine(item)
-        }
-    }
-}
-
-/**
- * 添加限制线
- */
-fun <T : BarLineData> BarLineChartBase<T>.addLimit(
-    value: Float, label: String, @ColorInt color: Int, yAxis: YAxis,
-    position: LimitLine.LimitLabelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP,
-    lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
-    lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
-) {
-    //添加限制线
-    yAxis.addLimitLine(LimitStyleLine(value, label).apply {
-        this.textColor = color
-        this.lineWidth = lineWidth
-        this.lineColor = color
-        this.textSize = textSize
-        this.pointRadius = pointRadius
-        this.enableDashedLine(lineLength, spaceLength, phase)
-        this.labelPosition = position
-    })
-}
-
-
-fun <T : BarLineData> BarLineChartBase<T>.setYRightAndLimit(
-    lineList: List<LimitLine?>,
-    gdl: Float = 0f,
-    space: Float = 0f,
-    phase: Float = 0f,
-): YAxis {
-    return axisRight.apply {
-        //重置所有限制线,以避免重叠线
-        removeAllLimitLines()
-        enableGridDashedLine(gdl, space, phase)
-        setDrawLimitLinesBehindData(true)
-        //设置限制线
-        for (item in lineList) {
-            addLimitLine(item)
-        }
-    }
-}
 
 /**
  * 设置与图表交互
@@ -310,6 +228,40 @@ fun <T : BarLineData> BarLineChartBase<T>.changeMode(
 }
 
 /**
+ * 设置X轴
+ */
+fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
+    drawAxisLine: Boolean = true,
+    drawGridLine: Boolean = false,
+    drawGridDashedLine: Boolean = false,
+): XAxis {
+    return xAxis.apply {
+        isEnabled = true //设置轴启用或禁用 如果禁用以下的设置全部不生效
+        axisLineColor = Color.GRAY
+        textSize = 8f
+        axisLineWidth = 1f
+        //设置x轴上每个点对应的线
+        setDrawGridLines(drawGridLine || drawGridDashedLine)
+        //设置竖线的显示样式为虚线：lineLength控制虚线段的长度，spaceLength控制线之间的空间
+        if (drawGridDashedLine) enableGridDashedLine(20f, 40f, 0f)
+        //绘制标签x轴上的对应数值
+        setDrawLabels(true)
+        //设置x轴的显示位置
+        position = XAxis.XAxisPosition.BOTTOM
+        //设置字体颜色
+        textColor = Color.BLACK
+        //图表将避免第一个和最后一个标签条目被减掉在图表或屏幕的边缘
+        setAvoidFirstLastClipping(true)
+        //设置x轴标签的旋转角度
+        labelRotationAngle = 0f
+        //是否绘制X轴的网格线
+        setDrawAxisLine(drawAxisLine)
+        spaceMax = 0.5f
+        setLabelCount(6, true)
+    }
+}
+
+/**
  * Y轴刻度计算
  */
 fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
@@ -398,6 +350,54 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     }
 }
 
+/**
+ * 设置Y轴
+ *
+ * @param lineList 限制线列表
+ */
+fun <T : BarLineData> BarLineChartBase<T>.setYLeftAndLimit(lineList: List<LimitLine>): YAxis {
+    //重置所有限制线,以避免重叠线
+    return axisLeft.apply {
+        //设置限制线
+        for (item in lineList) {
+            addLimitLine(item)
+        }
+    }
+}
+
+
+fun <T : BarLineData> BarLineChartBase<T>.setYRightAndLimit(lineList: List<LimitLine?>): YAxis {
+    return axisRight.apply {
+        //重置所有限制线,以避免重叠线
+        removeAllLimitLines()
+        //设置限制线
+        for (item in lineList) {
+            addLimitLine(item)
+        }
+    }
+}
+
+
+/**
+ * 添加限制线
+ */
+fun <T : BarLineData> BarLineChartBase<T>.addLimit(
+    value: Float, label: String, @ColorInt color: Int, yAxis: YAxis,
+    position: LimitLine.LimitLabelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP,
+    lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
+    lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
+) {
+    //添加限制线
+    yAxis.addLimitLine(LimitStyleLine(value, label).apply {
+        this.textColor = color
+        this.lineWidth = lineWidth
+        this.lineColor = color
+        this.textSize = textSize
+        this.pointRadius = pointRadius
+        this.enableDashedLine(lineLength, spaceLength, phase)
+        this.labelPosition = position
+    })
+}
 
 /**
  * 标准刷新
@@ -655,7 +655,6 @@ fun <T> BarChart.setBarChartData(
     xValueColorFormatter: (Float) -> Int,
     yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
     gradientColor: GradientColor? = null,
-    xAxis: XAxis? = null,
     isDrawValue: Boolean = true,
     isDrawValueAboveBar: Boolean = true,
 ) {
