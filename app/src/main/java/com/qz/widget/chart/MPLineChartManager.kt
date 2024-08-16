@@ -358,6 +358,8 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
 fun <T : BarLineData> BarLineChartBase<T>.setYLeftAndLimit(lineList: List<LimitLine>): YAxis {
     //重置所有限制线,以避免重叠线
     return axisLeft.apply {
+        //重置所有限制线,以避免重叠线
+        removeAllLimitLines()
         //设置限制线
         for (item in lineList) {
             addLimitLine(item)
