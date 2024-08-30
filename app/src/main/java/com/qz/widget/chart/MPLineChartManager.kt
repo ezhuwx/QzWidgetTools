@@ -256,7 +256,6 @@ fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
         labelRotationAngle = 0f
         //是否绘制X轴的网格线
         setDrawAxisLine(drawAxisLine)
-        spaceMax = 0.5f
         setLabelCount(6, true)
     }
 }
@@ -265,8 +264,8 @@ fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
  * Y轴刻度计算
  */
 fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
-    leftMin: Float,
-    leftMax: Float,
+    leftMin: Float? = null,
+    leftMax: Float? = null,
     rightMin: Float? = null,
     rightMax: Float? = null,
     leftNegativeEnable: Boolean = false,
@@ -287,9 +286,9 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     isForceLabelCount: Boolean = true,
 ) {
     //左边y轴峰谷计算
-    val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit)
+    val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit, labelCount)
     //设置左边y轴
-    axisLeft.run {
+    if (leftTicks != null) axisLeft.run {
         setDrawAxisLine(false)
         axisLineWidth = 1f
         //设置最小值
@@ -297,13 +296,15 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         //设置最大值
         axisMaximum = leftTicks.second
         //是否绘制0刻度线
-        setDrawZeroLine(leftMin < 0)
+        setDrawZeroLine((leftMin ?: 0f) < 0f)
         zeroLineColor = Color.BLACK
         zeroLineWidth = 0.5f
         leftColor?.let { textColor = it }
         setDrawTopYLabelEntry(true)
         //是否绘制网格
-        if (drawLeftGridDashedLine) setGridDashedLine(DashPathEffect(floatArrayOf(20f, 20f), 0f))
+        if (drawLeftGridDashedLine) {
+            setGridDashedLine(DashPathEffect(floatArrayOf(20f, 20f), 0f))
+        }
         setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
         setDrawAxisLine(drawLeftAxisLine)
         //等间距
@@ -312,42 +313,35 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         //坐标轴反转
         isInverted = isLeftInverted
 
-    }
+    } else axisLeft.isEnabled = false
     rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
     //右边y轴峰谷计算
-    axisRight.isEnabled = rightMax != null || rightMin != null
-    if (axisRight.isEnabled) {
-        val rightTicks =
-            NiceTickUtil.generateNiceTicks(rightMin ?: 0f, rightMax ?: 0f, rightMiniUnit)
-        axisRight.run {
-            axisLineWidth = 1f
-            //设置最小值
-            axisMinimum = if (rightTicks.first >= 0 || rightNegativeEnable) rightTicks.first else 0f
-            //设置最大值
-            axisMaximum = rightTicks.second
-            //是否绘制0刻度线
-            setDrawZeroLine((rightMin ?: 0f) < 0)
-            zeroLineColor = Color.BLACK
-            zeroLineWidth = 0.5f
-            rightColor?.let { textColor = it }
-            setDrawTopYLabelEntry(true)
-            //是否绘制网格
-            if (drawRightGridDashedLine) setGridDashedLine(
-                DashPathEffect(
-                    floatArrayOf(10f, 10f),
-                    0f
-                )
-            )
-            setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
-            setDrawAxisLine(drawRightAxisLine)
-            //等间距
-            isGranularityEnabled = false
-            setLabelCount(labelCount, isForceLabelCount)
-            //坐标轴反转
-            isInverted = isRightInverted
+    val rightTicks = NiceTickUtil.generateNiceTicks(rightMin, rightMax, rightMiniUnit, labelCount)
+    if (rightTicks != null) axisRight.run {
+        axisLineWidth = 1f
+        //设置最小值
+        axisMinimum = if (rightTicks.first >= 0 || rightNegativeEnable) rightTicks.first else 0f
+        //设置最大值
+        axisMaximum = rightTicks.second
+        //是否绘制0刻度线
+        setDrawZeroLine((rightMin ?: 0f) < 0)
+        zeroLineColor = Color.BLACK
+        zeroLineWidth = 0.5f
+        rightColor?.let { textColor = it }
+        setDrawTopYLabelEntry(true)
+        //是否绘制网格
+        if (drawRightGridDashedLine) {
+            setGridDashedLine(DashPathEffect(floatArrayOf(10f, 10f), 0f))
         }
-        rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
-    }
+        setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
+        setDrawAxisLine(drawRightAxisLine)
+        //等间距
+        isGranularityEnabled = false
+        setLabelCount(labelCount, isForceLabelCount)
+        //坐标轴反转
+        isInverted = isRightInverted
+    } else axisRight.isEnabled = false
+    rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
 }
 
 /**
