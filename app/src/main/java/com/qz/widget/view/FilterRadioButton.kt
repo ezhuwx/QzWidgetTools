@@ -2,6 +2,7 @@ package com.qz.widget.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -10,7 +11,9 @@ import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.RadioButton
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.widget.TextViewCompat
 import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
 import kotlin.math.floor
@@ -82,8 +85,12 @@ class FilterRadioButton : RadioButton {
         typeface = Typeface.DEFAULT_BOLD
         //居中
         gravity = Gravity.CENTER_VERTICAL
-        //灰黑色
-        setTextColor(Color.parseColor("#666666"))
+        //文字颜色
+        val colorResId = attrs?.getAttributeResourceValue(
+            ANDROID_NAMESPACE, "textColor", R.color.sub_gray
+        ) ?: R.color.sub_gray
+        val color = resources.getColor(colorResId)
+        setTextColor(color)
         //默认大小15sp
         setTextSize(TypedValue.COMPLEX_UNIT_SP, defaultMaxTextSize)
         //筛选图标
@@ -92,12 +99,12 @@ class FilterRadioButton : RadioButton {
             ResourcesCompat.getDrawable(resources, R.drawable.ic_pull_down, null),
             null
         )
+        TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(color))
         //默认图标字体间隔10dp
         compoundDrawablePadding = defaultDrawablePadding
         //白底圆角小背景（xml可设置阴影边框）
         val background = attrs?.getAttributeResourceValue(
-            "http://schemas.android.com/apk/res/android",
-            "background", R.drawable.small_white_corner_bg
+            ANDROID_NAMESPACE, "background", R.drawable.small_white_corner_bg
         ) ?: R.drawable.small_white_corner_bg
         //白底圆角小背景（xml可设置阴影边框）
         setBackgroundResource(background)
@@ -169,5 +176,12 @@ class FilterRadioButton : RadioButton {
             drawablePadding = defaultDrawablePadding / 2
             calculateSize(textSize - 1)
         }
+    }
+
+    companion object {
+        /**
+         * android 命名空间
+         */
+        const val ANDROID_NAMESPACE = "http://schemas.android.com/apk/res/android"
     }
 }
