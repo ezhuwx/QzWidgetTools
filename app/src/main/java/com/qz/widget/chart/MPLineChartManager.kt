@@ -288,11 +288,12 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     //左边y轴峰谷计算
     val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit, labelCount)
     //设置左边y轴
-    if (leftTicks != null) axisLeft.run {
+    axisLeft.isEnabled = leftTicks != null
+    if (axisLeft.isEnabled) axisLeft.run {
         setDrawAxisLine(false)
         axisLineWidth = 1f
         //设置最小值
-        axisMinimum = if (leftTicks.first >= 0 || leftNegativeEnable) leftTicks.first else 0f
+        axisMinimum = if (leftTicks!!.first >= 0 || leftNegativeEnable) leftTicks.first else 0f
         //设置最大值
         axisMaximum = leftTicks.second
         //是否绘制0刻度线
@@ -312,15 +313,15 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isLeftInverted
-
-    } else axisLeft.isEnabled = false
+    }
     rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
     //右边y轴峰谷计算
     val rightTicks = NiceTickUtil.generateNiceTicks(rightMin, rightMax, rightMiniUnit, labelCount)
-    if (rightTicks != null) axisRight.run {
+    axisRight.isEnabled = rightTicks != null
+    if (axisRight.isEnabled) axisRight.run {
         axisLineWidth = 1f
         //设置最小值
-        axisMinimum = if (rightTicks.first >= 0 || rightNegativeEnable) rightTicks.first else 0f
+        axisMinimum = if (rightTicks!!.first >= 0 || rightNegativeEnable) rightTicks.first else 0f
         //设置最大值
         axisMaximum = rightTicks.second
         //是否绘制0刻度线
@@ -340,7 +341,7 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isRightInverted
-    } else axisRight.isEnabled = false
+    }
     rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
 }
 

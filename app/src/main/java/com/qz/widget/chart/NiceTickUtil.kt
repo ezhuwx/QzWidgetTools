@@ -32,7 +32,9 @@ class NiceTickUtil {
                 //最小值
                 var minValue = min
                 // 处理最大值和最小值相等的情况
-                if (maxValue == minValue) {
+                if (maxValue == 0.0f && maxValue == minValue) {
+                    return null
+                } else if (maxValue == minValue) {
                     maxValue *= labelCount / 2f
                     minValue /= labelCount / 2f
                 }
