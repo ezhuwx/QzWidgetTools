@@ -51,7 +51,12 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     drawAxisLine: Boolean = true,
     drawGridLine: Boolean = false,
     drawGridDashedLine: Boolean = false,
-) {
+    legendVerticalAlign: Legend.LegendVerticalAlignment = Legend.LegendVerticalAlignment.TOP,
+    legendHorizontalAlign: Legend.LegendHorizontalAlignment = Legend.LegendHorizontalAlignment.LEFT,
+    legendStyle: Legend.LegendForm = Legend.LegendForm.LINE,
+    legendOrientation: Legend.LegendOrientation = Legend.LegendOrientation.HORIZONTAL,
+    legendSize: Float = 10f
+): Legend? {
     //设置描述信息
     description = Description().apply { text = desStr }
     //背景表格
@@ -65,11 +70,15 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     )
     extraTopOffset = extraTop
     //图例
-    if (isLegend) setLegend() else legend.isEnabled = false
+    if (isLegend) setLegend(
+        legendVerticalAlign, legendHorizontalAlign,
+        legendStyle, legendOrientation, legendSize
+    ) else legend.isEnabled = false
     //交互
     setInteraction()
     //x轴
     setXAxis(drawAxisLine, drawGridLine, drawGridDashedLine)
+    return legend
 }
 
 
@@ -102,18 +111,24 @@ fun <T : BarLineData> BarLineChartBase<T>.setInteraction() {
 /**
  * 设置图例
  */
-fun <T : BarLineData> BarLineChartBase<T>.setLegend(): Legend {
+fun <T : BarLineData> BarLineChartBase<T>.setLegend(
+    verticalAlign: Legend.LegendVerticalAlignment = Legend.LegendVerticalAlignment.TOP,
+    horizontalAlign: Legend.LegendHorizontalAlignment = Legend.LegendHorizontalAlignment.LEFT,
+    style: Legend.LegendForm = Legend.LegendForm.LINE,
+    orientation: Legend.LegendOrientation = Legend.LegendOrientation.HORIZONTAL,
+    size: Float = 10f
+): Legend {
     return legend.apply {
-        verticalAlignment = Legend.LegendVerticalAlignment.TOP
-        horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+        this.verticalAlignment = verticalAlign
+        this.horizontalAlignment = horizontalAlign
         //设置文字大小
-        textSize = 10f
+        textSize = size
         textColor = Color.BLACK
         //正方形，圆形或线
-        form = Legend.LegendForm.LINE
-        orientation = Legend.LegendOrientation.HORIZONTAL
+        this.form = style
+        this.orientation = orientation
         // 设置Form的大小
-        formSize = 10f
+        formSize = size
         formToTextSpace = 2f
         //是否支持自动换行 目前只支持BelowChartLeft, BelowChartRight, BelowChartCenter
         isWordWrapEnabled = true
@@ -383,10 +398,11 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
     position: LimitLine.LimitLabelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP,
     lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
     lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
+    @ColorInt textColor: Int? = null
 ) {
     //添加限制线
     yAxis.addLimitLine(LimitStyleLine(value, label).apply {
-        this.textColor = color
+        this.textColor = textColor ?: color
         this.lineWidth = lineWidth
         this.lineColor = color
         this.textSize = textSize
