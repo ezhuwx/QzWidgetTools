@@ -4,12 +4,12 @@ import com.github.mikephil.charting.components.XAxis
 
 /**
  * @author : ezhuwx
- * Describe : 可任意设置标签数量的X轴
+ * Describe : 多行标签显示
  * Designed on 2023/7/14
  * E-mail : ezhuwx@163.com
  * Update on 13:56 by ezhuwx
  */
-class LabelSetXAxis : XAxis() {
+class MultiLineLabelsXAxis : XAxis() {
     var fixedLabelCount: Int = 0
 
     override fun getLongestLabel(): String {

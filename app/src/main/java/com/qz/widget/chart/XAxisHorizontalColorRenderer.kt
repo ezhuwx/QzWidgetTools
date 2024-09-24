@@ -6,7 +6,9 @@ import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.renderer.XAxisRendererHorizontalBarChart
 import com.github.mikephil.charting.utils.MPPointF
+import com.github.mikephil.charting.utils.Transformer
 import com.github.mikephil.charting.utils.Utils
+import kotlin.math.abs
 
 /**
  * @author : ezhuwx
@@ -74,9 +76,10 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
     }
 
     override fun computeAxisValues(min: Float, max: Float) {
-        val labelCount = if (mAxis is LabelSetXAxis) (mAxis as LabelSetXAxis).fixedLabelCount
-        else mAxis.labelCount
-        val range = Math.abs(max - min).toDouble()
+        val labelCount =
+            if (mAxis is MultiLineLabelsXAxis) (mAxis as MultiLineLabelsXAxis).fixedLabelCount
+            else mAxis.labelCount
+        val range = abs(max - min).toDouble()
 
         if (labelCount == 0 || range <= 0 || java.lang.Double.isInfinite(range)) {
             mAxis.mEntries = floatArrayOf()

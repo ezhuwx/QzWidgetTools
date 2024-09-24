@@ -579,7 +579,7 @@ fun BarChart.initBarChart(
     //图例
     legend.isEnabled = isLegendEnabled
     //设置x轴标签
-    if (this is XAxisSetHorizontalBarChart) setXAis(LabelSetXAxis())
+    if (this is XAxisSetHorizontalBarChart) setXAis(MultiLineLabelsXAxis())
     //x轴渲染器
     setXAxisRenderer(XAxisHorizontalColorRenderer(this))
     //不展示图表描述信息
@@ -752,7 +752,7 @@ fun <T> Chart<*>.buildBarChartData(
         xAxis?.setAxisMinimum(-0.5f)
         xAxis?.setAxisMaximum(dataList.size.toFloat() - 0.5f)
     }
-    if (xAxis is LabelSetXAxis) xAxis.fixedLabelCount = dataList.size
+    if (xAxis is MultiLineLabelsXAxis) xAxis.fixedLabelCount = dataList.size
     data.setValueTextColors(valueColors)
     data.setValueTextSize(8f)
     data.setDrawValues(isDrawValue)
@@ -811,7 +811,7 @@ fun <T> BarChart.setChartStackData(
     dataSets.add(dataBarSet)
     //显示设置
     val data = BarData(dataSets)
-    if (xAxis is LabelSetXAxis) (xAxis as LabelSetXAxis).fixedLabelCount = dataList.size
+    if (xAxis is MultiLineLabelsXAxis) (xAxis as MultiLineLabelsXAxis).fixedLabelCount = dataList.size
     else xAxis.labelCount = dataList.size
     xAxis.setCenterAxisLabels(false)
     xAxis.granularity = 1f

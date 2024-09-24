@@ -8,9 +8,6 @@ import android.util.AttributeSet
 import com.qz.widget.R
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.YAxis
-import com.github.mikephil.charting.renderer.XAxisRenderer
-import com.github.mikephil.charting.utils.MPPointF
-import com.github.mikephil.charting.utils.Utils
 import me.jessyan.autosize.AutoSizeCompat
 
 /**
@@ -22,6 +19,8 @@ import me.jessyan.autosize.AutoSizeCompat
  * version 2.0.0
  */
 class HighValuesLineCart : LineChart {
+
+    private lateinit var xRenter: CustomPosLabelXAxis
 
     constructor(context: Context) : super(context) {
         initRenderSet(context)
@@ -44,70 +43,13 @@ class HighValuesLineCart : LineChart {
         setNoDataTextColor(Color.BLACK)
         //高亮渲染
         mRenderer = HighValuesLegendRenderer(this, mAnimator, mViewPortHandler)
-        //X轴渲染
-        setXAxisRenderer(object : XAxisRenderer(
+        xRenter = CustomPosLabelXAxis(
             viewPortHandler,
             xAxis,
             getTransformer(YAxis.AxisDependency.LEFT)
-        ) {
-            /**
-             * draws the x-labels on the specified y-position
-             *
-             * @param pos
-             */
-            override fun drawLabels(c: Canvas?, pos: Float, anchor: MPPointF?) {
-                val labelRotationAngleDegrees = mXAxis.labelRotationAngle
-                val centeringEnabled = mXAxis.isCenterAxisLabelsEnabled
-                val positions = FloatArray(mXAxis.mEntryCount * 2)
-                run {
-                    var i = 0
-                    while (i < positions.size) {
-                        // only fill x values
-                        if (centeringEnabled) {
-                            positions[i] = mXAxis.mCenteredEntries[i / 2]
-                        } else {
-                            positions[i] = mXAxis.mEntries[i / 2]
-                        }
-                        i += 2
-                    }
-                }
-                mTrans.pointValuesToPixel(positions)
-                var i = 0
-                while (i < positions.size) {
-                    var x = positions[i]
-                    if (mViewPortHandler.isInBoundsX(x)) {
-                        val label =
-                            mXAxis.valueFormatter.getAxisLabel(mXAxis.mEntries[i / 2], mXAxis)
-                        if (mXAxis.isAvoidFirstLastClippingEnabled) {
-                            // avoid clipping of the last
-                            if (i / 2 == mXAxis.mEntryCount - 1 && mXAxis.mEntryCount > 1) {
-                                val width = Utils.calcTextWidth(mAxisLabelPaint, label).toFloat()
-                                if (width > mViewPortHandler.offsetRight() * 2
-                                    && x + width > mViewPortHandler.chartWidth
-                                ) x -= width / 2
-                                // avoid clipping of the first
-                            } else if (i == 0) {
-                                x += 10f
-                            }
-                        }
-                        val lines = label.split("\n")
-                        for (lineIndex in lines.indices) {
-                            val yOffset = lineIndex * mAxisLabelPaint.textSize
-                            drawLabel(
-                                c,
-                                lines[lineIndex],
-                                x,
-                                pos + yOffset,
-                                anchor,
-                                labelRotationAngleDegrees
-                            )
-                        }
-
-                    }
-                    i += 2
-                }
-            }
-        })
+        )
+        //X轴渲染
+        setXAxisRenderer(xRenter)
     }
 
     fun setHighValuesListener(listener: HighValuesLegendRenderer.OnHighLightChangeListener?) {
@@ -118,5 +60,12 @@ class HighValuesLineCart : LineChart {
         val resources = super.getResources()
         AutoSizeCompat.autoConvertDensityOfGlobal(resources)
         return resources
+    }
+
+    /**
+     * 自定义要显示的X值
+     */
+    fun setCustomShowValues(customShowValues: FloatArray? = null) {
+        xRenter.customShowValues = customShowValues
     }
 }
