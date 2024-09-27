@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.Resources
 import android.graphics.Color
 import android.util.AttributeSet
+import com.github.mikephil.charting.charts.BarChart
 import com.qz.widget.R
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.YAxis
@@ -19,8 +20,7 @@ import me.jessyan.autosize.AutoSizeCompat
  * Update on 17:00 by ezhuwx
  * version 2.0.0
  */
-class HighValuesLineCart : LineChart {
-
+class MultiLineXLabelBarCart : BarChart {
     private lateinit var xRenter: CustomPosLabelXAxis
 
     constructor(context: Context) : super(context) {
@@ -42,8 +42,6 @@ class HighValuesLineCart : LineChart {
     private fun initRenderSet(context: Context) {
         setNoDataText(context.getString(R.string.empty_data))
         setNoDataTextColor(Color.BLACK)
-        //高亮渲染
-        mRenderer = HighValuesLegendRenderer(this, mAnimator, mViewPortHandler)
         //X轴渲染   //X轴渲染
         xRenter = CustomPosLabelXAxis(
             viewPortHandler,
@@ -51,10 +49,6 @@ class HighValuesLineCart : LineChart {
             getTransformer(YAxis.AxisDependency.LEFT)
         )
         setXAxisRenderer(xRenter)
-    }
-
-    fun setHighValuesListener(listener: HighValuesLegendRenderer.OnHighLightChangeListener?) {
-        (mRenderer as HighValuesLegendRenderer).onHighLightChangeListener = listener
     }
 
     override fun getResources(): Resources {

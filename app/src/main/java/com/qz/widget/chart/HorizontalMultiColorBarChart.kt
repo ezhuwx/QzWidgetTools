@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import com.qz.widget.R
+import com.qz.widget.chart.render.HorizontalBarMultiColorValueRender
 
 /**
  * @author : ezhuwx

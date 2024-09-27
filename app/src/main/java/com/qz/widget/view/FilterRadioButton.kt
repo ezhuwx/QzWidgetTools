@@ -110,7 +110,7 @@ class FilterRadioButton : RadioButton {
         setBackgroundResource(background)
     }
 
-    override fun setText(text: CharSequence, type: BufferType) {
+    override fun setText(text: CharSequence?, type: BufferType?) {
         super.setText("", type)
         this.text = text
         this.type = type
@@ -120,7 +120,7 @@ class FilterRadioButton : RadioButton {
     }
 
     override fun getText(): CharSequence {
-        return text!!
+        return text ?: ""
     }
 
     override fun onDraw(canvas: Canvas) {

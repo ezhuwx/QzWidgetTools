@@ -1,4 +1,4 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.render
 
 import android.graphics.Canvas
 import android.graphics.Typeface
@@ -6,8 +6,9 @@ import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.renderer.XAxisRendererHorizontalBarChart
 import com.github.mikephil.charting.utils.MPPointF
-import com.github.mikephil.charting.utils.Transformer
 import com.github.mikephil.charting.utils.Utils
+import com.qz.widget.chart.formatter.ColorByValueFormatter
+import com.qz.widget.chart.axis.MultiLineLabelsXAxis
 import kotlin.math.abs
 
 /**

@@ -1,4 +1,4 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.axis
 
 import android.graphics.Canvas
 import com.github.mikephil.charting.components.XAxis

@@ -33,6 +33,11 @@ import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBub
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.model.GradientColor
 import com.qz.widget.R
+import com.qz.widget.chart.axis.MultiLineLabelsXAxis
+import com.qz.widget.chart.formatter.ColorByValueFormatter
+import com.qz.widget.chart.render.LimitStyleLine
+import com.qz.widget.chart.render.XAxisHorizontalColorRenderer
+import com.qz.widget.chart.render.YAxisLimitStyleRender
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -48,6 +53,7 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     extraTop: Float = 10f,
     isLegend: Boolean = true,
     desStr: String = "",
+    desYOffset: Float = 10f,
     drawAxisLine: Boolean = true,
     drawGridLine: Boolean = false,
     drawGridDashedLine: Boolean = false,
@@ -58,7 +64,10 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     legendSize: Float = 10f
 ): Legend? {
     //设置描述信息
-    description = Description().apply { text = desStr }
+    description = Description().apply {
+        text = desStr
+        yOffset = desYOffset
+    }
     //背景表格
     setDrawGridBackground(false)
     //边距
@@ -558,10 +567,9 @@ fun PieChart.setTotalData(
  */
 fun BarChart.initBarChart(
     context: Context,
-    left: Float = 10f,
-    top: Float = 0f,
-    right: Float = 30f,
-    bottom: Float = 0f,
+    left: Float = 40f, top: Float = 30f,
+    right: Float = 40f, bottom: Float = 40f,
+    extraTop: Float = 10f,
     isLegendEnabled: Boolean = true,
     xLabelSel: (Int) -> String,
     xSubLabelSel: ((Int) -> String)? = null,
@@ -578,15 +586,17 @@ fun BarChart.initBarChart(
 ) {
     //图例
     legend.isEnabled = isLegendEnabled
-    //设置x轴标签
-    if (this is XAxisSetHorizontalBarChart) setXAis(MultiLineLabelsXAxis())
-    //x轴渲染器
-    setXAxisRenderer(XAxisHorizontalColorRenderer(this))
     //不展示图表描述信息
     setNoDataText(context.getString(R.string.empty_data))
     setNoDataTextColor(Color.BLACK)
     // 和四周相隔一段距离,显示数据
-    setExtraOffsets(left, top, right, bottom)
+    setViewPortOffsets(
+        AutoSizeUtils.dp2px(context, left).toFloat(),
+        AutoSizeUtils.dp2px(context, top).toFloat(),
+        AutoSizeUtils.dp2px(context, right).toFloat(),
+        AutoSizeUtils.dp2px(context, bottom).toFloat()
+    )
+    extraTopOffset = extraTop
     description.isEnabled = false
     //所有值均绘制在其条形顶部上方
     setDrawValueAboveBar(true)
@@ -613,23 +623,40 @@ fun BarChart.initBarChart(
     rightAxis.setDrawLabels(drawRightAxisLabels)
     //设置x坐标轴显示位置在下方
     xAxis.position = XAxis.XAxisPosition.BOTTOM
+    xAxis.axisLineColor = Color.GRAY
+    xAxis.textSize = 8f
+    xAxis.axisLineWidth = 1f
     xAxis.setDrawAxisLine(true)
     //将X轴的值显示在中央
     xAxis.setCenterAxisLabels(true)
-    xAxis.valueFormatter = object : ColorByValueFormatter() {
-        override fun getAxisLabel(value: Float, axis: AxisBase?): String {
-            val index = value.toInt()
-            return xLabelSel(index)
-        }
+    //设置x轴标签
+    if (this is XAxisSetHorizontalBarChart) {
+        //水平柱状图
+        setXAis(MultiLineLabelsXAxis())
+        //x轴渲染器
+        setXAxisRenderer(XAxisHorizontalColorRenderer(this))
+        xAxis.valueFormatter = object : ColorByValueFormatter() {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+                val index = value.toInt()
+                return xLabelSel(index)
+            }
 
-        override fun getSubXLabelValue(value: Float): String? {
-            val index = value.toInt()
-            return xSubLabelSel?.invoke(index)
-        }
+            override fun getSubXLabelValue(value: Float): String? {
+                val index = value.toInt()
+                return xSubLabelSel?.invoke(index)
+            }
 
-        override fun getColorForValue(value: Float): Int {
-            val index = value.toInt()
-            return xColorSel(index)
+            override fun getColorForValue(value: Float): Int {
+                val index = value.toInt()
+                return xColorSel(index)
+            }
+        }
+    } else {
+        xAxis.valueFormatter = object : ValueFormatter() {
+            override fun getFormattedValue(value: Float): String {
+                val index = value.toInt()
+                return xLabelSel(index)
+            }
         }
     }
     //图例设置在下方
@@ -665,8 +692,8 @@ fun <T> BarChart.setBarChartData(
     dataList: MutableList<T>,
     dataFormatter: (T) -> MutableList<Float?>,
     valueFormatter: (Float, Int) -> String,
-    xValueColorFormatter: (Float) -> Int,
     yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
+    xValueColorFormatter: ((Float) -> Int)? = null,
     gradientColor: GradientColor? = null,
     isDrawValue: Boolean = true,
     isDrawValueAboveBar: Boolean = true,
@@ -695,7 +722,7 @@ fun <T> Chart<*>.buildBarChartData(
     dataList: MutableList<T>,
     dataFormatter: (T) -> MutableList<Float?>,
     valueFormatter: (Float, Int) -> String,
-    xValueColorFormatter: (Float) -> Int,
+    xValueColorFormatter: ((Float) -> Int)? = null,
     yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
     gradientColor: GradientColor? = null,
     xAxis: XAxis? = null,
@@ -712,7 +739,9 @@ fun <T> Chart<*>.buildBarChartData(
         values.forEachIndexed { listIndex, value ->
             if (value != null) {
                 dataValues[listIndex].add(BarEntry(index.toFloat(), value))
-                valueColors.add(xValueColorFormatter(value))
+                if (xValueColorFormatter != null) {
+                    valueColors.add(xValueColorFormatter(value))
+                }
             }
         }
 
@@ -769,7 +798,7 @@ fun <T> Chart<*>.buildBarChartData(
         }
 
         override fun getColorForValue(value: Float): Int {
-            return xValueColorFormatter(value)
+            return xValueColorFormatter?.invoke(value) ?: Color.TRANSPARENT
         }
     })
     return data
@@ -811,8 +840,9 @@ fun <T> BarChart.setChartStackData(
     dataSets.add(dataBarSet)
     //显示设置
     val data = BarData(dataSets)
-    if (xAxis is MultiLineLabelsXAxis) (xAxis as MultiLineLabelsXAxis).fixedLabelCount = dataList.size
-    else xAxis.labelCount = dataList.size
+    if (xAxis is MultiLineLabelsXAxis) {
+        (xAxis as MultiLineLabelsXAxis).fixedLabelCount = dataList.size
+    } else xAxis.labelCount = dataList.size
     xAxis.setCenterAxisLabels(false)
     xAxis.granularity = 1f
     setDrawBarShadow(true)

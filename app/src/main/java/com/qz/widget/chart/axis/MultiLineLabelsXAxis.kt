@@ -1,6 +1,7 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.axis
 
 import com.github.mikephil.charting.components.XAxis
+import com.qz.widget.chart.formatter.ColorByValueFormatter
 
 /**
  * @author : ezhuwx

@@ -1,4 +1,4 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.formatter
 
 import com.github.mikephil.charting.formatter.ValueFormatter
 

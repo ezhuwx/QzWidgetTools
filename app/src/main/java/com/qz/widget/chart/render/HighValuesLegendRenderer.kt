@@ -1,4 +1,4 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.render
 
 import android.graphics.Canvas
 import android.graphics.Color

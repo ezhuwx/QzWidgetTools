@@ -23,6 +23,19 @@ class LinkViewOption {
     @ColorInt
     var textColor = Color.BLACK
 
+    constructor(value: String, width: Int, typeName: String, textSize: Float) {
+        this.value = value
+        this.width = width
+        this.typeName = typeName
+        this.textSize = textSize
+    }
+
+    constructor(value: String, width: Int, textSize: Float) {
+        this.value = value
+        this.width = width
+        this.textSize = textSize
+    }
+
     constructor(value: String, width: Int, typeName: String) {
         this.value = value
         this.width = width
