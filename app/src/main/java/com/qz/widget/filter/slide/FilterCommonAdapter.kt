@@ -20,7 +20,7 @@ class FilterCommonAdapter(
     private val isHadChildren: Boolean,
     private val level: Int = 0,
     private var selectedId: String? = null,
-    private var defaultParentId: String?
+    private var defaultParentId: String?= null
 ) : BaseQuickAdapter<FilterData, BaseViewHolder>(R.layout.item_filter_common) {
     private var selectedPosition = -1
 
@@ -32,9 +32,9 @@ class FilterCommonAdapter(
             setTextColor(
                 context.getColor(
                     if (selectedId == item.filterDataId || selectedPosition == holder.layoutPosition) {
-                        R.color.deep_yellow
+                        R.color.dark_orange
                     } else if (isHadChildren && defaultParentId == item.filterDataId) {
-                        R.color.light_yellow
+                        R.color.deep_yellow
                     } else {
                         R.color.colorPrimary
                     }
