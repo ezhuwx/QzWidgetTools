@@ -17,7 +17,7 @@ import com.qz.widget.R
  * Update on 10:37 by ezhuwx
  */
 class MultiSelManager(
-    private val filterInstance: QzSlideFilter,
+    private val filterInstance: BaseCommonFilter,
     private val requestManager: RequestManager,
     private val configuration: FilterConfiguration
 ) {
@@ -62,7 +62,7 @@ class MultiSelManager(
                 //全选
                 else configuration.multiParentIds?.addAll(
                     (if (configuration.isLocalData) requestManager.localData
-                    else configuration.parentList)?.map { it.id }.orEmpty()
+                    else configuration.parentList)?.map { it.filterDataId }.orEmpty()
                 )
                 //更新
                 multiParentAdapter?.setSelIds(configuration.multiParentIds)
@@ -197,7 +197,7 @@ class MultiSelManager(
         val allChild = configuration.parentChildMap[parentId] ?: arrayListOf()
         //选中子类数量
         val childSelCount = allChild.count {
-            configuration.multiChildIds?.contains(it.id) == true
+            configuration.multiChildIds?.contains(it.filterDataId) == true
         }
         when {
             //从部分选中的父类id集合中移除
@@ -225,9 +225,9 @@ class MultiSelManager(
         val childIds: List<FilterData>? = configuration.parentChildMap[parentId]
         if (childIds != null) {
             //全选
-            if (checked) configuration.multiChildIds?.addAll(childIds.map { it.id })
+            if (checked) configuration.multiChildIds?.addAll(childIds.map { it.filterDataId })
             //取消全选
-            else configuration.multiChildIds?.removeAll(childIds.map { it.id }.toSet())
+            else configuration.multiChildIds?.removeAll(childIds.map { it.filterDataId }.toSet())
             //删除父类选中
             configuration.multiChildPartSelParentIds?.remove(parentId)
             multiChildAdapter?.setMultiPartChildSelIds(configuration.multiChildPartSelParentIds)
@@ -266,7 +266,7 @@ class MultiSelManager(
             multiParentAdapter?.setNewInstance(data)
             //顶级全选回显
             if (configuration.selIdResult != null && configuration.selIdResult == configuration.topOptionId) {
-                configuration.multiParentIds?.addAll(data.map { it.id })
+                configuration.multiParentIds?.addAll(data.map { it.filterDataId })
                 multiParentAdapter?.setSelIds(configuration.multiParentIds)
                 //全选
                 topItemCb.isChecked = true
@@ -305,7 +305,7 @@ class MultiSelManager(
                 if (configuration.multiParentIds?.contains(it) == true) {
                     //取出子级，转换为子级ID集合
                     configuration.parentChildMap[it]?.map { data ->
-                        data.id
+                        data.filterDataId
                     }?.let { childIds ->
                         //移除子级ID
                         partSelChildIds?.removeAll(childIds.toSet())

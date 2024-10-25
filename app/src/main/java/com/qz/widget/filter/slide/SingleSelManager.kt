@@ -13,7 +13,7 @@ import com.qz.widget.R
  * Update on 10:38 by ezhuwx
  */
 class SingleSelManager(
-    private val filterInstance: QzSlideFilter,
+    private val filterInstance: BaseCommonFilter,
     private val requestManager: RequestManager,
     private val configuration: FilterConfiguration
 ) {
@@ -30,7 +30,7 @@ class SingleSelManager(
         this.currentView = currentView
         with(configuration) {
             parentRv.layoutManager = LinearLayoutManager(filterInstance.requireContext())
-            parentAdapter = FilterCommonAdapter(isHadChildren, 0, configuration.defaultId)
+            parentAdapter = FilterCommonAdapter(isHadChildren, 0, defaultId, defaultParentId)
             parentRv.adapter = parentAdapter
             parentAdapter!!.setOnItemClickListener { _, _, position: Int ->
                 onSingleParentClick(position)
@@ -40,8 +40,8 @@ class SingleSelManager(
                 //顶部值插入
                 if (topOptionId != null) {
                     val topOption = FilterData()
-                    topOption.id = topOptionId
-                    topOption.label = topOptionName
+                    topOption.filterDataId = topOptionId
+                    topOption.filterDataLabel = topOptionName
                     requestManager.localData?.add(0, topOption)
                 }
                 parentAdapter?.setNewInstance(requestManager.localData)
@@ -58,7 +58,9 @@ class SingleSelManager(
         with(configuration) {
             //二级菜单
             childrenRv.layoutManager = LinearLayoutManager(filterInstance.requireContext())
-            childrenAdapter = FilterCommonAdapter(false, 1, configuration.defaultId)
+            childrenAdapter = FilterCommonAdapter(
+                false, 1, defaultId, defaultParentId
+            )
             childrenRv.adapter = childrenAdapter
             childrenAdapter?.setOnItemClickListener { _, _, position: Int ->
                 val data = childrenAdapter!!.getItem(position)
@@ -67,13 +69,14 @@ class SingleSelManager(
                     selNameResult = parentName
                     selIdResult = parentId
                 } else {
-                    selIdResult = data.id
-                    selNameResult = data.label
+                    selIdResult = data.filterDataId
+                    selNameResult = data.filterDataLabel
                 }
                 requestManager.onSingleSelFinished?.onSelFinished(
                     selNameResult,
                     selIdResult,
                     parentName,
+                    parentId,
                     true
                 )
                 requestManager.onSingleResultListener?.onResultParse(data)
@@ -89,8 +92,8 @@ class SingleSelManager(
     private fun onSingleParentClick(position: Int) {
         with(configuration) {
             val data = parentAdapter!!.getItem(position)
-            parentId = data.id
-            parentName = data.label
+            parentId = data.filterDataId
+            parentName = data.filterDataLabel
             parentAdapter?.setSelectedPos(position)
             when {
                 //首行选中
@@ -101,6 +104,7 @@ class SingleSelManager(
                         selNameResult,
                         selIdResult,
                         topOptionName,
+                        topOptionId,
                         false
                     )
                     requestManager.onSingleResultListener?.onResultParse(data)
@@ -136,8 +140,8 @@ class SingleSelManager(
                 if (!isChild) {
                     if (topOptionId != null) {
                         val topOption = FilterData()
-                        topOption.id = topOptionId
-                        topOption.label = topOptionName
+                        topOption.filterDataId = topOptionId
+                        topOption.filterDataLabel = topOptionName
                         filterData.add(0, topOption)
                     }
                     parentAdapter?.setNewInstance(filterData)
@@ -145,8 +149,8 @@ class SingleSelManager(
                     //跳过父级选择
                     if (!isSkipParentSel) {
                         val topOption = FilterData()
-                        topOption.id = parentId
-                        topOption.label = parentName
+                        topOption.filterDataId = parentId
+                        topOption.filterDataLabel = parentName
                         filterData.add(0, topOption)
                     }
                     childrenAdapter?.setNewInstance(filterData)
@@ -161,14 +165,76 @@ class SingleSelManager(
         topOptionId: String? = null,
         topOptionName: String? = null,
         isHadChildren: Boolean = false,
-        onSelFinished: OnSingleSelFinishedListener
+        defaultParentId: String? = null,
+        onSelFinished: OnSingleSelFinishedFullListener
     ): SingleSelManager {
         configuration.isMultiSelect = false
         configuration.defaultId = defaultId
+        configuration.defaultParentId = defaultParentId
         configuration.topOptionId = topOptionId
         configuration.topOptionName = topOptionName
         configuration.isHadChildren = isHadChildren
         requestManager.onSingleSelFinished = onSelFinished
+        return this
+    }
+
+    fun init(
+        defaultId: String? = null,
+        topOptionId: String? = null,
+        topOptionName: String? = null,
+        isHadChildren: Boolean = false,
+        defaultParentId: String? = null,
+        onSelFinished: OnSingleSelFinishedListener
+    ): SingleSelManager {
+        init(
+            defaultId,
+            topOptionId,
+            topOptionName,
+            isHadChildren,
+            defaultParentId
+        ) { name, id, _, parentName, isChild ->
+            onSelFinished.onSelFinished(name, id, parentName, isChild)
+        }
+        return this
+    }
+
+    fun init(
+        defaultId: String? = null,
+        topOptionId: String? = null,
+        topOptionName: String? = null,
+        isHadChildren: Boolean = false,
+        defaultParentId: String? = null,
+        onSelFinished: OnSingleSelFinishedSimpleListener
+    ): SingleSelManager {
+        init(
+            defaultId,
+            topOptionId,
+            topOptionName,
+            isHadChildren,
+            defaultParentId
+        ) { name, id, _, _, _ ->
+            onSelFinished.onSelFinished(name, id)
+        }
+        return this
+    }
+
+    fun init(
+        defaultId: String? = null,
+        topOptionId: String? = null,
+        topOptionName: String? = null,
+        isHadChildren: Boolean = false,
+        defaultParentId: String? = null,
+        onSelFinished: OnSingleSelFinishedIdListener
+    ): SingleSelManager {
+        init(
+            defaultId,
+            topOptionId,
+            topOptionName,
+            isHadChildren,
+            defaultParentId
+        ) { _, id, _, _, _ ->
+            onSelFinished.onSelFinished(id)
+        }
         return this
     }
 

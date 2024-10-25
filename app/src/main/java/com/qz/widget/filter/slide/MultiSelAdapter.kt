@@ -26,7 +26,7 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
         //参数名称
         val itemTv =
             holder.getView<androidx.appcompat.widget.AppCompatTextView>(R.id.item_tv).apply {
-                text = item.label
+                text = item.filterDataLabel
             }
         val itemCb = holder.getView<androidx.appcompat.widget.AppCompatCheckBox>(R.id.item_cb)
         //背景
@@ -35,12 +35,12 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
         }
         //选中样式
         when {
-            selIds.contains(item.id) -> {
+            selIds.contains(item.filterDataId) -> {
                 itemTv.setTextColor(context.resources.getColor(R.color.colorPrimary))
                 itemCb.isChecked = true
             }
 
-            multiPartChildSelIds?.contains(item.id) == true -> {
+            multiPartChildSelIds?.contains(item.filterDataId) == true -> {
                 itemTv.setTextColor(context.resources.getColor(R.color.deep_yellow))
                 itemCb.isChecked = false
             }
@@ -52,11 +52,11 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
         }
         //选中
         itemCb.setOnClickListener {
-            val isChecked = !selIds.contains(item.id)
-            if (isChecked) selIds.add(item.id)
-            else if (selIds.size > (if (isCanEmpty) 0 else 1)) selIds.remove(item.id)
+            val isChecked = !selIds.contains(item.filterDataId)
+            if (isChecked) selIds.add(item.filterDataId)
+            else if (selIds.size > (if (isCanEmpty) 0 else 1)) selIds.remove(item.filterDataId)
             notifyItemChanged(holder.layoutPosition)
-            onSelChangeListener?.onSelChange(item.id, isChecked, parentId)
+            onSelChangeListener?.onSelChange(item.filterDataId, isChecked, parentId)
         }
         //名称点击
         itemTv.setOnClickListener {
@@ -65,7 +65,7 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
                 val prePost = selPos
                 selPos = holder.layoutPosition
                 if (prePost >= 0) notifyItemChanged(prePost)
-                onShowChildListener?.onShowChild(item.id)
+                onShowChildListener?.onShowChild(item.filterDataId)
             } else itemCb.performClick()
         }
     }
@@ -114,7 +114,7 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
             this.multiPartChildSelIds = multiPartChildSelIds
             for ((pos, item) in data.withIndex()) {
                 //参数id
-                if (multiPartChildSelIds.contains(item.id)) notifyItemChanged(pos)
+                if (multiPartChildSelIds.contains(item.filterDataId)) notifyItemChanged(pos)
             }
         }
     }

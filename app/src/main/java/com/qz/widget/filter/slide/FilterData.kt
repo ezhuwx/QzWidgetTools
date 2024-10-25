@@ -12,14 +12,14 @@ open class FilterData(
     /**
      * 标识
      */
-    open var id: String? = null,
+    open var filterDataId: String? = null,
     /**
      * 名称
      */
-    open var label: String? = null,
+    open var filterDataLabel: String? = null,
 
     /**
      * 说明备注
      */
-    open var note: String? = null
+    open var filterDataDes: String? = null
 )

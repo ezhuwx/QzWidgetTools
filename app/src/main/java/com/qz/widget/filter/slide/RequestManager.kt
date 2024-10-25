@@ -4,7 +4,7 @@ import androidx.fragment.app.FragmentManager
 
 class RequestManager(
     private val configuration: FilterConfiguration,
-    private val filterInstance: QzSlideFilter
+    private val filterInstance: BaseCommonFilter
 ) {
 
     /**
@@ -55,7 +55,7 @@ class RequestManager(
     /**
      * 单选完成
      */
-    var onSingleSelFinished: OnSingleSelFinishedListener? = null
+    var onSingleSelFinished: OnSingleSelFinishedFullListener? = null
 
     /**
      * 多选完成
@@ -111,7 +111,7 @@ class RequestManager(
                     configuration.parentList = parseData
                     //空父类
                     if (configuration.isHadChildren) parseData.forEach { parent ->
-                        configuration.parentChildMap[parent.id] =
+                        configuration.parentChildMap[parent.filterDataId] =
                             arrayListOf()
                     }
                 }
@@ -162,9 +162,6 @@ class RequestManager(
         return this
     }
 
-    fun build(): QzSlideFilter {
-        return filterInstance
-    }
 
     fun show(fragmentManager: FragmentManager) {
         filterInstance.show(fragmentManager)

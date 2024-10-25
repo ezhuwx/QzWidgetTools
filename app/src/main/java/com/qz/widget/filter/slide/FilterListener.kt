@@ -1,14 +1,50 @@
 package com.qz.widget.filter.slide
 
+fun interface OnSingleSelFinishedIdListener {
+    /**
+     * 选择完成
+     *
+     * @param id ID
+     */
+    fun onSelFinished(id: String?)
+}
+
+fun interface OnSingleSelFinishedSimpleListener {
+    /**
+     * 选择完成
+     *
+     * @param name       名称
+     * @param id         ID
+     */
+    fun onSelFinished(name: String?, id: String?)
+}
+
 fun interface OnSingleSelFinishedListener {
     /**
      * 选择完成
      *
      * @param name       名称
      * @param id         ID
-     * @param otherParam 上级名称或其它参数
+     * @param parentName 上级名称或其它参数
      */
-    fun onSelFinished(name: String?, id: String?, otherParam: String?, isChild: Boolean)
+    fun onSelFinished(name: String?, id: String?, parentName: String?, isChild: Boolean)
+}
+
+fun interface OnSingleSelFinishedFullListener {
+    /**
+     * 选择完成
+     *
+     * @param name       名称
+     * @param id         ID
+     * @param parentName 上级名称或其它参数
+     */
+    fun onSelFinished(
+        name: String?,
+        id: String?,
+        parentName: String?,
+        parentId: String?,
+        isChild: Boolean
+    )
 }
 
 fun interface OnMultiSelFinishedListener {

@@ -19,7 +19,8 @@ import com.qz.widget.R
 class FilterCommonAdapter(
     private val isHadChildren: Boolean,
     private val level: Int = 0,
-    private var selectedId: String? = null
+    private var selectedId: String? = null,
+    private var defaultParentId: String?
 ) : BaseQuickAdapter<FilterData, BaseViewHolder>(R.layout.item_filter_common) {
     private var selectedPosition = -1
 
@@ -27,11 +28,13 @@ class FilterCommonAdapter(
     override fun convert(holder: BaseViewHolder, item: FilterData) {
         //名称
         holder.getView<TextView>(R.id.item_tv).apply {
-            text = item.label
+            text = item.filterDataLabel
             setTextColor(
                 context.getColor(
-                    if (selectedId == item.id || selectedPosition == holder.layoutPosition) {
+                    if (selectedId == item.filterDataId || selectedPosition == holder.layoutPosition) {
                         R.color.deep_yellow
+                    } else if (isHadChildren && defaultParentId == item.filterDataId) {
+                        R.color.light_yellow
                     } else {
                         R.color.colorPrimary
                     }
@@ -39,41 +42,34 @@ class FilterCommonAdapter(
             )
         }
         //说明
-        holder.getView<TextView>(R.id.note_tv).isVisible = level == 1 && !item.note.isNullOrEmpty()
+        holder.getView<TextView>(R.id.note_tv).isVisible =
+            level == 1 && !item.filterDataDes.isNullOrEmpty()
         //分割线（两级菜单不显示）
         val lineV: View = holder.getView(R.id.line_v)
-        lineV.visibility =
-            if (isHadChildren || level != 0) View.GONE else View.VISIBLE
+        lineV.isVisible = !isHadChildren && level == 0
+        //背景
+        val bgGray = context.resources.getColor(R.color.bg_gray)
+        val bgWhite = context.resources.getColor(R.color.bg_white_gray)
         if (isHadChildren) {
             if (selectedPosition == holder.layoutPosition) {
                 if (level == 0) {
-                    holder.itemView.setBackgroundColor(Color.parseColor("#fAfAfA"))
+                    holder.itemView.setBackgroundColor(bgWhite)
                 } else {
                     holder.itemView.setBackgroundColor(Color.WHITE)
                 }
             } else {
                 when (level) {
-                    0 -> {
-                        holder.itemView.setBackgroundColor(Color.parseColor("#f5f5f5"))
-                    }
-
-                    1 -> {
-                        holder.itemView.setBackgroundColor(Color.parseColor("#fAfAfA"))
-                    }
-
-                    else -> {
-                        holder.itemView.setBackgroundColor(Color.WHITE)
-                    }
+                    0 -> holder.itemView.setBackgroundColor(bgGray)
+                    1 -> holder.itemView.setBackgroundColor(bgWhite)
+                    else -> holder.itemView.setBackgroundColor(Color.WHITE)
                 }
             }
         } else {
             holder.itemView.setBackgroundColor(
                 when (level) {
-                    1 -> Color.parseColor("#fAfAfA")
+                    1 -> bgWhite
                     2 -> Color.WHITE
-                    else -> Color.parseColor(
-                        "#f5f5f5"
-                    )
+                    else -> bgGray
                 }
             )
         }

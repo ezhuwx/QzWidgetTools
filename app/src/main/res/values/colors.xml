@@ -15,5 +15,8 @@
     <color name="content_gray">#999999</color>
     <color name="line_gray">#EAEAEA</color>
     <color name="sub_gray">#666666</color>
+    <color name="light_yellow">#ECB66D</color>
     <color name="deep_yellow">#FFC107</color>
+    <color name="bg_gray">#f5f5f5</color>
+    <color name="bg_white_gray">#fCfCfC</color>
 </resources>

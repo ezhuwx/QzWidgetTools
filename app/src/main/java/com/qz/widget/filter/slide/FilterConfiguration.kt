@@ -61,7 +61,10 @@ class FilterConfiguration {
      * 默认ID
      */
     var defaultId: String? = null
-
+    /**
+     * 默认ID
+     */
+    var defaultParentId: String? = null
     /**
      * 选中名称
      */
