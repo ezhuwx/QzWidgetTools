@@ -6,12 +6,13 @@ plugins {
     //alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.mavenPublish)
+    alias(libs.plugins.kotlinKapt)
 }
 
 android {
     namespace = "com.qz.widget"
     compileSdk = 34
-    version = "1.0.5.10"
+    version = "1.0.5.60"
     defaultConfig {
         //applicationId = "com.ez.widget"
         minSdk = 24
@@ -31,6 +32,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        dataBinding = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

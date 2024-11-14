@@ -12,7 +12,7 @@
         <!--边框圆角-->
         <attr name="boxCornerRadius" format="dimension" />
         <!--文本-->
-        <attr name="text" format="string" />
+        <attr name="textStr" format="string" />
         <!--文本大小-->
         <attr name="textSize" format="dimension" />
         <!--文本颜色-->
@@ -29,6 +29,8 @@
         <attr name="textPaddingBottom" format="dimension" />
         <!--提示文字-->
         <attr name="hintText" format="string" />
+        <!--必填内容-->
+        <attr name="isRequired" format="boolean" />
         <!--不可用状态及提示文字颜色-->
         <attr name="hintUnEnableColor" format="reference|color" />
         <!--错误文字-->
@@ -47,5 +49,13 @@
         <attr name="android:imeOptions" />
         <!--输入字符设置-->
         <attr name="android:digits" />
+        <!--输入字符长度-->
+        <attr name="android:maxLength" />
+        <!--焦点全选-->
+        <attr name="android:selectAllOnFocus" />
+        <!--可选文本-->
+        <attr name="android:selectable" />
+        <!--内容位置-->
+        <attr name="android:gravity" />
     </declare-styleable>
 </resources>

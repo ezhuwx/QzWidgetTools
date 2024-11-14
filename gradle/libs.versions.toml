@@ -6,6 +6,8 @@ junitVersion = "1.1.5"
 espressoCore = "3.5.1"
 #kotlin
 kotlin = "1.9.0"
+#kapt
+kapt = "2.0.0"
 #MavenPublish
 mavenPublish="0.28.0"
 #ktx
@@ -22,6 +24,7 @@ adapterHelper = "3.0.14"
 pickerView = "4.1.9"
 #androidChart
 androidChart = "v3.1.0"
+databindingCommon = "8.7.2"
 
 
 #-------------------------------------------libraries-----------------------------------------------
@@ -54,3 +57,4 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibiary = { id = "com.android.library", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "mavenPublish" }
+kotlinKapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kapt" }
