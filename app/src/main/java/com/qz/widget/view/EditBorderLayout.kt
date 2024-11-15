@@ -28,6 +28,8 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.view.marginTop
+import androidx.core.view.postOnAnimationDelayed
 import androidx.core.widget.addTextChangedListener
 import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
@@ -175,7 +177,6 @@ class EditBorderLayout(
     private var realCanvas: Canvas? = null
     private var isNeedBuild = AtomicBoolean(true)
     private var isHintOnTop = false
-    private var isHintViewLayout = false
     private val viewId = Random.nextInt(100000000, 999999999)
 
 
@@ -442,12 +443,13 @@ class EditBorderLayout(
         layoutParams.addRule(CENTER_HORIZONTAL)
         layoutParams.addRule(ALIGN_BASELINE, viewId)
         addView(hintView, layoutParams)
-        hintView?.post {
-            //绘制完成
-            isHintViewLayout = true
-            //提示文字上移
-            if (!textStr.isNullOrEmpty()) onHintTranslation(true)
-        }
+        //边距
+        layoutParams.setMargins(
+            textPaddingStart.toInt(),
+            (textPaddingTop + textStrSize / 2f + tipInterval).toInt(),
+            textPaddingEnd.toInt(),
+            textPaddingBottom.toInt()
+        )
     }
 
     /**
@@ -553,86 +555,25 @@ class EditBorderLayout(
     }
 
     /**
-     * 提示文字上移动画
-     */
-    private fun onHintTranslation(isMoveUp: Boolean) {
-        //状态变化
-        if (isHintOnTop != isMoveUp && isHintViewLayout) {
-            isHintOnTop = isMoveUp
-            //内容高度
-            val height = (if (isEditable) editView?.height else textView?.height)?.toFloat() ?: 0f
-            //实际上移高度
-            val translationY =
-                height - textPaddingTop - textStrSize / 2f - textPaddingBottom - tipInterval
-            //上移
-            hintView!!.animate().run {
-                duration = 100
-                translationY(if (isMoveUp) -translationY else 0f).start()
-            }
-        }
-    }
-
-    /**
      * 必填项颜色格式化
      */
     private fun onFormatRequired() {
         if (!hintStr.isNullOrEmpty()) {
             val text = hintStr?.plus(if (isRequired) "*" else "") ?: ""
-            hintView?.text = SpannableStringBuilder(text).apply {
+            hintView?.text = if (isRequired) SpannableStringBuilder(text).apply {
                 setSpan(
                     ForegroundColorSpan(Color.RED),
                     text.length - 1, text.length,
                     SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
-            }
+            } else text
         }
-    }
-
-    /**
-     * 设置边框颜色
-     */
-    private fun setBoxStrokeColor(boxStrokeColor: Int) {
-        borderPaint.color = boxStrokeColor
-        buildBorder()
-    }
-
-    /**
-     * 获取当前文字内容
-     */
-    private fun isContentEmpty(): Boolean {
-        return (if (isEditable) editView?.text.toString() else textView?.text.toString()).isEmpty()
-    }
-
-    /**
-     * 异常
-     */
-    fun stateError() {
-        //重绘异常边框
-        buildBorder(if (isEditable) editView?.hasFocus() == true else false, true)
-        //抖动动画
-        startAnimation(TranslateAnimation(0f, 10f, 0f, 0f).apply {
-            setDuration(50)
-            setRepeatCount(3)
-            repeatMode = Animation.REVERSE
-        })
-    }
-
-    fun setTextStr(text: String?) {
-        this.textStr = text
-        onTextChange()
-    }
-
-    fun setTextStr(@StringRes stringId: Int) {
-        this.textStr = context.resources.getString(stringId)
-        onTextChange()
     }
 
     /**
      * 内容变化
      */
     private fun onTextChange() {
-        //提示文字上移动画
-        if (!textStr.isNullOrEmpty()) onHintTranslation(true)
         //文字配置
         if (isEditable) editView?.setText(textStr)
         else {
@@ -640,29 +581,29 @@ class EditBorderLayout(
             //内容监听回调
             onTextChanged?.invoke(textStr)
         }
+        //上移动画
+        if (!textStr.isNullOrEmpty()) (if (isEditable) editView else textView)?.post {
+            onHintTranslation(true)
+        }
         //重绘边框
         buildBorder()
     }
 
     /**
-     * 获取内容
+     * 提示文字上移动画
      */
-    fun getContent(): String {
-        return (if (isEditable) editView else textView)?.text?.toString() ?: ""
-    }
-
-    /**
-     * 获取提示内容
-     */
-    fun getHintStr(): String? {
-        return hintView?.text?.toString()
-    }
-
-    /**
-     * 可编辑的内容
-     */
-    fun isEditText(): Boolean {
-        return isEditable
+    private fun onHintTranslation(isMoveUp: Boolean) {
+        //状态变化
+        if (isHintOnTop != isMoveUp) {
+            isHintOnTop = isMoveUp
+            //实际上移高度
+            val translationY = textPaddingTop + textStrSize / 2f + tipInterval / 2f
+            //上移
+            hintView!!.animate().run {
+                duration = 100
+                translationY(if (isMoveUp) -translationY else 0f).start()
+            }
+        }
     }
 
     override fun setEnabled(isEnabled: Boolean) {
@@ -689,6 +630,75 @@ class EditBorderLayout(
             )
             compoundDrawablePadding = AutoSizeUtils.dp2px(context, if (isEnabled) 5f else 0f)
         }
+    }
+
+    /**
+     * 获取内容
+     */
+    fun getContent(): String {
+        return (if (isEditable) editView else textView)?.text?.toString() ?: ""
+    }
+
+    fun setTextStr(text: String?) {
+        this.textStr = text
+        onTextChange()
+    }
+
+    fun setTextStr(@StringRes stringId: Int) {
+        this.textStr = context.resources.getString(stringId)
+        onTextChange()
+    }
+
+    /**
+     * 获取当前文字内容
+     */
+    private fun isContentEmpty(): Boolean {
+        return (if (isEditable) editView?.text.toString() else textView?.text.toString()).isEmpty()
+    }
+
+    /**
+     * 获取提示内容
+     */
+    fun getHintStr(): String? {
+        return hintView?.text?.toString()
+    }
+
+    /**
+     * 可编辑的内容
+     */
+    fun isEditText(): Boolean {
+        return isEditable
+    }
+
+    /**
+     * 设置边框颜色
+     */
+    private fun setBoxStrokeColor(boxStrokeColor: Int) {
+        borderPaint.color = boxStrokeColor
+        buildBorder()
+    }
+
+    /**
+     * 异常
+     */
+    fun stateError() {
+        //重绘异常边框
+        buildBorder(if (isEditable) editView?.hasFocus() == true else false, true)
+        //抖动动画
+        startAnimation(TranslateAnimation(0f, 10f, 0f, 0f).apply {
+            setDuration(50)
+            setRepeatCount(3)
+            repeatMode = Animation.REVERSE
+        })
+    }
+
+
+    /**
+     * 必填配置
+     */
+    fun setIsRequired(isRequired: Boolean) {
+        this.isRequired = isRequired
+        onFormatRequired()
     }
 
     /**
