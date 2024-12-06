@@ -690,7 +690,8 @@ fun BarChart.initBarChart(
 fun <T> BarChart.setBarChartData(
     legends: MutableList<Pair<String?, Int>>,
     dataList: MutableList<T>,
-    dataFormatter: (T) -> MutableList<Float?>,
+    dataFormatter: ((T) -> MutableList<Float?>)? = null,
+    fullDataFormatter: ((Pair<Int, T>) -> MutableList<Pair<Float, Float>?>)? = null,
     valueFormatter: (Float, Int) -> String,
     yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
     xValueColorFormatter: ((Float) -> Int)? = null,
@@ -702,6 +703,7 @@ fun <T> BarChart.setBarChartData(
         legends,
         dataList,
         dataFormatter,
+        fullDataFormatter,
         valueFormatter,
         xValueColorFormatter,
         xAxis = xAxis,
@@ -720,7 +722,8 @@ fun <T> BarChart.setBarChartData(
 fun <T> Chart<*>.buildBarChartData(
     legends: MutableList<Pair<String?, Int>>,
     dataList: MutableList<T>,
-    dataFormatter: (T) -> MutableList<Float?>,
+    dataFormatter: ((T) -> MutableList<Float?>)? = null,
+    fullDataFormatter: ((Pair<Int, T>) -> MutableList<Pair<Float, Float>?>)? = null,
     valueFormatter: (Float, Int) -> String,
     xValueColorFormatter: ((Float) -> Int)? = null,
     yAxisDependency: YAxis.AxisDependency = YAxis.AxisDependency.LEFT,
@@ -734,9 +737,18 @@ fun <T> Chart<*>.buildBarChartData(
     val dataValues = MutableList(legends.size) { arrayListOf<BarEntry>() }
     //设置y轴显示的数据
     for ((index, data) in dataList.withIndex()) {
-        //数据解析
-        val values = dataFormatter(data)
-        values.forEachIndexed { listIndex, value ->
+        //（x,y）数据解析
+        fullDataFormatter?.invoke(Pair(index, data))?.forEachIndexed { listIndex, value ->
+            if (value != null) {
+                val (xValue, yValue) = value
+                dataValues[listIndex].add(BarEntry(xValue, yValue))
+                if (xValueColorFormatter != null) {
+                    valueColors.add(xValueColorFormatter(xValue))
+                }
+            }
+        }
+        //（index，y）数据解析
+        dataFormatter?.invoke(data)?.forEachIndexed { listIndex, value ->
             if (value != null) {
                 dataValues[listIndex].add(BarEntry(index.toFloat(), value))
                 if (xValueColorFormatter != null) {
@@ -744,7 +756,6 @@ fun <T> Chart<*>.buildBarChartData(
                 }
             }
         }
-
     }
     dataValues.forEach { dataValuesList.add(it) }
     //数据配置
@@ -770,16 +781,24 @@ fun <T> Chart<*>.buildBarChartData(
     val barWidth = (1f - groupSpace) / barAmount - 0.05f
     //设置柱状图宽度
     data.barWidth = if (dataList.size < 3) 0.15f else barWidth
+    if (fullDataFormatter != null) {
+        val dataOnly = dataValuesList.first()
+        val xMaxValue = dataOnly.maxOf { it.x }
+        val xMinValue = dataOnly.minOf { it.x }
+        data.barWidth *= (xMaxValue - xMinValue) / dataOnly.size.toFloat()
+    }
     //(起始点、柱状图组间距、柱状图之间间距)
     if (barAmount > 1) {
         data.groupBars(0f, groupSpace, barSpace)
         xAxis?.setLabelCount(dataList.size, false)
-        xAxis?.axisMaximum = dataList.size.toFloat()
+        if (fullDataFormatter == null) xAxis?.axisMaximum = dataList.size.toFloat()
     } else {
         xAxis?.granularity = 1f
         xAxis?.setCenterAxisLabels(false)
-        xAxis?.setAxisMinimum(-0.5f)
-        xAxis?.setAxisMaximum(dataList.size.toFloat() - 0.5f)
+        if (fullDataFormatter == null) {
+            xAxis?.setAxisMinimum(-0.5f)
+            xAxis?.setAxisMaximum(dataList.size.toFloat() - 0.5f)
+        }
     }
     if (xAxis is MultiLineLabelsXAxis) xAxis.fixedLabelCount = dataList.size
     data.setValueTextColors(valueColors)
