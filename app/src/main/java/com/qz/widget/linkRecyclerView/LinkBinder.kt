@@ -1,5 +1,6 @@
 package com.qz.widget.linkRecyclerView
 
+import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 
@@ -11,7 +12,8 @@ interface LinkBinder<T, VH : BaseViewHolder?, H : LinkHeaderView?> {
         get() = linkManager.helper
 
     fun onInitLinkAdapter(headerHsv: RecyclerView): LinkBinderAdapter<T, VH, H> {
-        return LinkBinderAdapter(headerHsv, this)
+        linkAdapter = LinkBinderAdapter(headerHsv, this)
+        return linkAdapter
     }
 
 
@@ -23,6 +25,7 @@ interface LinkBinder<T, VH : BaseViewHolder?, H : LinkHeaderView?> {
     fun onReBuildHeaderData() {
         linkAdapter.headerData = onBuildHeader()
     }
+
     /**
      * 配置头
      *
@@ -32,6 +35,7 @@ interface LinkBinder<T, VH : BaseViewHolder?, H : LinkHeaderView?> {
         onReBuildHeaderData()
         linkAdapter.onRebuildHeader()
     }
+
     /**
      * 配置头
      *

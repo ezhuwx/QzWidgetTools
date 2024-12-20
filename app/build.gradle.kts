@@ -12,7 +12,7 @@ plugins {
 android {
     namespace = "com.qz.widget"
     compileSdk = 34
-    version = "1.0.5.90"
+    version = "1.0.6.10"
     defaultConfig {
         //applicationId = "com.ez.widget"
         minSdk = 24

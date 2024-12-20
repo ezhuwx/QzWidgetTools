@@ -15,7 +15,7 @@ import com.chad.library.adapter.base.viewholder.BaseViewHolder
  * Update on 14:57 by ezhuwx
  */
 class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
-    private val headerHsv: RecyclerView,
+    val headerHsv: RecyclerView,
     private val binder: LinkBinder<T, VH, H>
 ) {
 
@@ -41,6 +41,10 @@ class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
     var gridLineColor: Int? = null
 
     private var onLinkItemClickListener: OnLinkItemClickListener<T>? = null
+
+    init {
+        initHeader(headerHsv.context)
+    }
 
     fun onViewAttachedToWindow(context: Context, holder: VH) {
         initHeader(context)
