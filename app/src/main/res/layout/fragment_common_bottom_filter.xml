@@ -5,9 +5,11 @@
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:background="@drawable/big_top_corner_gray_bg"
-    android:elevation="5dp">
+    android:elevation="5dp"
+    android:minHeight="200dp">
 
     <FrameLayout
+        android:id="@+id/top_fl"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:background="@drawable/big_top_corner_white_bg"
@@ -15,7 +17,8 @@
         app:layout_constraintBottom_toTopOf="@+id/multi_top_item_cl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
 
         <View
             android:id="@+id/top_v"
@@ -36,7 +39,8 @@
         android:orientation="horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/content_ll"
-        tools:visibility="gone">
+        app:layout_constraintTop_toBottomOf="@+id/top_fl"
+        tools:visibility="visible">
 
         <CheckBox
             android:id="@+id/top_item_cb"
@@ -72,9 +76,10 @@
         android:id="@+id/content_ll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:minHeight="200dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/multi_top_item_cl">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/parent_rv"
@@ -82,9 +87,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
             android:overScrollMode="never"
             android:paddingBottom="80dp"
-            tools:itemCount="5"
+            tools:itemCount="160"
             tools:listitem="@layout/item_filter_common" />
 
 
@@ -95,9 +101,13 @@
             android:layout_weight="1"
             android:background="@color/white"
             android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
             android:overScrollMode="never"
             android:paddingBottom="80dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            tools:itemCount="160"
+            tools:listitem="@layout/item_filter_common"
+            tools:visibility="visible" />
     </LinearLayout>
 
 

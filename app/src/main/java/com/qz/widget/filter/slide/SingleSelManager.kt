@@ -4,6 +4,7 @@ import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.qz.widget.R
+import me.jessyan.autosize.utils.AutoSizeUtils
 
 /**
  * @author : ezhuwx
@@ -29,6 +30,10 @@ class SingleSelManager(
     fun onSingleSelInit(currentView: View) {
         this.currentView = currentView
         with(configuration) {
+            parentRv.setPadding(
+                0, 0, 0,
+                AutoSizeUtils.dp2px(filterInstance.requireContext(), 20f)
+            )
             parentRv.layoutManager = LinearLayoutManager(filterInstance.requireContext())
             parentAdapter = FilterCommonAdapter(isHadChildren, 0, defaultId, defaultParentId)
             parentRv.adapter = parentAdapter
@@ -57,6 +62,10 @@ class SingleSelManager(
     private fun onSingleChildInit() {
         with(configuration) {
             //二级菜单
+            childrenRv.setPadding(
+                0, 0, 0,
+                AutoSizeUtils.dp2px(filterInstance.requireContext(), 20f)
+            )
             childrenRv.layoutManager = LinearLayoutManager(filterInstance.requireContext())
             childrenAdapter = FilterCommonAdapter(
                 false, 1, defaultId, defaultParentId

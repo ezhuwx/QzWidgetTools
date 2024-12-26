@@ -40,6 +40,13 @@ class QzBottomFilter : QzBaseBottomSheetDialog(), BaseCommonFilter {
         return R.layout.fragment_common_bottom_filter
     }
 
+    override fun onStart() {
+        super.onStart()
+        val screenHeight = requireActivity().window?.decorView?.measuredHeight
+        behavior.maxHeight = ((screenHeight ?: 640) / 3f * 2f).toInt()
+        behavior.isDraggable = false
+    }
+
     override fun bindView(view: View) {
         currentView = view
         //多选初始化
