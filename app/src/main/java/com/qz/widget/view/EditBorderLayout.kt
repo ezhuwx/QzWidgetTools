@@ -28,8 +28,6 @@ import android.widget.TextView
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.view.marginTop
-import androidx.core.view.postOnAnimationDelayed
 import androidx.core.widget.addTextChangedListener
 import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
@@ -55,7 +53,7 @@ class EditBorderLayout(
     /**
      * 边框宽度 px
      */
-    private var boxStrokeWidth: Float = 3f,
+    private var boxStrokeWidth: Float = AutoSizeUtils.dp2px(context, 1f).toFloat(),
     /**
      * 边框焦点颜色
      */
@@ -63,7 +61,7 @@ class EditBorderLayout(
     /**
      * 边框圆角
      */
-    private var boxCornerRadius: Float = 15f,
+    private var boxCornerRadius: Float = AutoSizeUtils.dp2px(context, 6f).toFloat(),
     /**
      * 文字
      */
@@ -72,11 +70,11 @@ class EditBorderLayout(
     /**
      * 文字大小 px
      */
-    private var textStrSize: Float = 48f,
+    private var textStrSize: Float =  AutoSizeUtils.dp2px(context, 14f).toFloat(),
     /**
      * 提示文字与文字间距
      */
-    private var tipInterval: Float = 9f,
+    private var tipInterval: Float = AutoSizeUtils.dp2px(context, 3f).toFloat(),
     /**
      * 文字颜色
      */
@@ -108,19 +106,19 @@ class EditBorderLayout(
     /**
      * 文字左边距 px
      */
-    private var textPaddingStart: Float = 30f,
+    private var textPaddingStart: Float = AutoSizeUtils.dp2px(context, 10f).toFloat(),
     /**
      * 文字上边距 px
      */
-    private var textPaddingTop: Float = 30f,
+    private var textPaddingTop: Float = AutoSizeUtils.dp2px(context, 10f).toFloat(),
     /**
      * 文字右边距 px
      */
-    private var textPaddingEnd: Float = 30f,
+    private var textPaddingEnd: Float = AutoSizeUtils.dp2px(context, 10f).toFloat(),
     /**
      * 文字下边距 px
      */
-    private var textPaddingBottom: Float = 30f,
+    private var textPaddingBottom: Float = AutoSizeUtils.dp2px(context, 10f).toFloat(),
 
     /**
      * 是否可编辑
@@ -228,10 +226,7 @@ class EditBorderLayout(
         //输入框文字颜色
         textStrColor = typedArray.getColor(R.styleable.EditBorderLayout_textColor, textStrColor)
         //输入框文字大小
-        textStrSize = AutoSizeUtils.dp2px(context, 14f).toFloat()
         textStrSize = typedArray.getDimension(R.styleable.EditBorderLayout_textSize, textStrSize)
-        //间距
-        tipInterval = AutoSizeUtils.dp2px(context, 3f).toFloat()
         //输入框文字最大行数
         textMaxLines = typedArray.getInteger(
             R.styleable.EditBorderLayout_textMaxLines, textMaxLines
@@ -251,22 +246,18 @@ class EditBorderLayout(
             R.styleable.EditBorderLayout_android_imeOptions, imeOptions
         )
         //输入框文字内边距
-        textPaddingStart = AutoSizeUtils.dp2px(context, 10f).toFloat()
         textPaddingStart = typedArray.getDimension(
             R.styleable.EditBorderLayout_textPaddingStart, textPaddingStart
         )
         //输入框文字内边距
-        textPaddingTop = AutoSizeUtils.dp2px(context, 10f).toFloat()
         textPaddingTop = typedArray.getDimension(
             R.styleable.EditBorderLayout_textPaddingTop, textPaddingTop
         )
         //输入框文字内边距
-        textPaddingEnd = AutoSizeUtils.dp2px(context, 10f).toFloat()
         textPaddingEnd = typedArray.getDimension(
             R.styleable.EditBorderLayout_textPaddingEnd, textPaddingEnd
         )
         //输入框文字内边距
-        textPaddingBottom = AutoSizeUtils.dp2px(context, 10f).toFloat()
         textPaddingBottom = typedArray.getDimension(
             R.styleable.EditBorderLayout_textPaddingBottom, textPaddingBottom
         )
@@ -320,6 +311,8 @@ class EditBorderLayout(
         if (isEditable) initEditView()
         //初始化文本
         else initTextView()
+        //初始化文字内容
+        if (!textStr.isNullOrEmpty()) onTextChange()
         //状态配置
         onBuildContentEnabled(isEnabled)
     }
@@ -434,6 +427,7 @@ class EditBorderLayout(
     private fun initHintView() {
         hintView = TextView(context).apply {
             setTextSize(TypedValue.COMPLEX_UNIT_PX, textStrSize)
+            isSingleLine = true
         }
         //追加必填*号
         if (isRequired) onFormatRequired()
