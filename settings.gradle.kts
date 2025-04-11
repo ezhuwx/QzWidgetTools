@@ -1,25 +1,30 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
-        mavenCentral()
+        mavenLocal()
         gradlePluginPortal()
+        maven ("https://repo.huaweicloud.com/repository/maven/")
+        maven ("https://mirrors.cloud.tencent.com/nexus/repository/google/")
+        maven ("https://mirrors.cloud.tencent.com/nexus/repository/jcenter/")
+        maven ("https://maven.aliyun.com/repository/gradle-plugin")
+        maven ("https://maven.aliyun.com/repository/public")
+        maven ("https://maven.aliyun.com/repository/google")
+        maven ("https://developer.huawei.com/repo/")
+        maven ("https://jitpack.io")
     }
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        google()
+        mavenLocal()
         mavenCentral()
-        maven("https://esri.jfrog.io/artifactory/arcgis")
-        maven("https://maven.aliyun.com/repository/public")
-        maven("https://maven.aliyun.com/nexus/content/repositories/jcenter")
-        maven("https://jitpack.io")
+        maven ("https://repo.huaweicloud.com/repository/maven/")
+        maven ("https://mirrors.cloud.tencent.com/nexus/repository/google/")
+        maven ("https://mirrors.cloud.tencent.com/nexus/repository/jcenter/")
+        maven ("https://maven.aliyun.com/repository/public")
+        maven ("https://maven.aliyun.com/repository/google")
+        maven ("https://esri.jfrog.io/artifactory/arcgis")
+        maven ("https://developer.huawei.com/repo/")
+        maven ("https://jitpack.io")
     }
 }
 
