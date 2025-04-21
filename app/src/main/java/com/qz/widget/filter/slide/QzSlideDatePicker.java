@@ -171,7 +171,9 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         Calendar startDate = Calendar.getInstance();
         startDate.set(2015, 0, 1);
         Calendar endDate = Calendar.getInstance();
-        endDate.setTime(new Date());
+        endDate.set(Calendar.HOUR_OF_DAY, 23);
+        endDate.set(Calendar.MINUTE, 59);
+        endDate.set(Calendar.SECOND, 59);
         //时间选择器
         return new TimePickerBuilder(requireContext(), this::onTimePicked)
                 .setType(new boolean[]{true, !isFormatWithYear, !isFormatWithYear && !isFormatWithMonth,
@@ -267,6 +269,7 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         isFormatWithYear = false;
         return this;
     }
+
     /**
      * 格式化到分（默认到小时）
      */
@@ -302,6 +305,7 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         isFormatWithYear = false;
         return this;
     }
+
     /**
      * 格式化到年（默认到小时）
      */
@@ -313,6 +317,7 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         isFormatWithYear = true;
         return this;
     }
+
     public interface OnTimePickFinishedListener {
         /**
          * 选择完成
