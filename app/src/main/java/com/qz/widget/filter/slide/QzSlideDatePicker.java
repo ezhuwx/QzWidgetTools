@@ -29,12 +29,12 @@ import java.util.Locale;
  * Update on 16:47 by ezhuwx
  */
 public class QzSlideDatePicker extends QzBaseSlideFragment {
-    private final SimpleDateFormat FORMAT_YEAR = new SimpleDateFormat("yyyy", Locale.getDefault());
-    private final SimpleDateFormat FORMAT_MONTH = new SimpleDateFormat("yyyy-MM", Locale.getDefault());
-    private final SimpleDateFormat FORMAT_DAY = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-    private final SimpleDateFormat FORMAT_HOUR = new SimpleDateFormat("yyyy-MM-dd HH", Locale.getDefault());
-    private final SimpleDateFormat FORMAT_SECOND = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-    private final SimpleDateFormat FORMAT_MINUTE = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+    private final static String FORMAT_YEAR = "yyyy";
+    private final static String FORMAT_MONTH = "yyyy-MM";
+    private final static String FORMAT_DAY = "yyyy-MM-dd";
+    private final static String FORMAT_HOUR = "yyyy-MM-dd HH";
+    private final static String FORMAT_SECOND = "yyyy-MM-dd HH:mm:ss";
+    private final static String FORMAT_MINUTE = "yyyy-MM-dd HH:mm";
     LinearLayout startTimeLl;
     LinearLayout startTimeTitleLl;
     LinearLayout endTimeLl;
@@ -83,6 +83,14 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      */
     private boolean isOnlyShowEndTime;
     /**
+     * 是否显示年
+     */
+    private boolean isShowYear = true;
+    /**
+     * 无限制时间（可以选择，未来日期）
+     */
+    private boolean isShowFuture = false;
+    /**
      * 选择的开始时间
      */
     private String startTime;
@@ -90,6 +98,14 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      * 选择的截止时间
      */
     private String endTime;
+    /**
+     * 最早年份
+     */
+    private int miniYear = 2015;
+    /**
+     * 最晚年份
+     */
+    private int maxYear = 2099;
 
     @Override
     public int getLayoutRes() {
@@ -106,12 +122,14 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         confirmTv = v.findViewById(R.id.confirm_tv);
         confirmTv.setOnClickListener(this::onClick);
         //日期格式
-        format = isFormatWithSecond ? FORMAT_SECOND
+        String formatStr = isFormatWithSecond ? FORMAT_SECOND
                 : isFormatWithMinute ? FORMAT_MINUTE
                 : isFormatWithDay ? FORMAT_DAY
                 : isFormatWithMonth ? FORMAT_MONTH
                 : isFormatWithYear ? FORMAT_YEAR
                 : FORMAT_HOUR;
+        formatStr = isShowYear ? formatStr : formatStr.replace("yyyy-", "");
+        format = new SimpleDateFormat(formatStr, Locale.getDefault());
         //是否只显示截止时间
         if (!isOnlyShowEndTime) {
             //开始时间初始化
@@ -169,14 +187,18 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         }
         //日期范围开始时间
         Calendar startDate = Calendar.getInstance();
-        startDate.set(2015, 0, 1);
+        startDate.set(miniYear, 0, 1);
+        //日期范围结束时间
         Calendar endDate = Calendar.getInstance();
+        if (isShowFuture) {
+            endDate.set(maxYear, 0, 1);
+        }
         endDate.set(Calendar.HOUR_OF_DAY, 23);
         endDate.set(Calendar.MINUTE, 59);
         endDate.set(Calendar.SECOND, 59);
         //时间选择器
         return new TimePickerBuilder(requireContext(), this::onTimePicked)
-                .setType(new boolean[]{true, !isFormatWithYear, !isFormatWithYear && !isFormatWithMonth,
+                .setType(new boolean[]{isShowYear, !isFormatWithYear, !isFormatWithYear && !isFormatWithMonth,
                         !isFormatWithYear && !isFormatWithMonth && !isFormatWithDay,
                         isFormatWithMinute || isFormatWithSecond, isFormatWithSecond})
                 .setLabel("年", "月", "日",
@@ -247,6 +269,38 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
     public QzSlideDatePicker onlyShowEndTime(String endTime) {
         this.endTime = endTime;
         isOnlyShowEndTime = true;
+        return this;
+    }
+
+    /**
+     * 隐藏年份显示
+     */
+    public QzSlideDatePicker hideYear() {
+        isShowYear = false;
+        return this;
+    }
+
+    /**
+     * 显示未来时间
+     */
+    public QzSlideDatePicker showFuture() {
+        isShowFuture = true;
+        return this;
+    }
+
+    /**
+     * 设置最早年份
+     */
+    public QzSlideDatePicker setMinYear(int miniYear) {
+        this.miniYear = miniYear;
+        return this;
+    }
+
+    /**
+     * 设置最晚年份
+     */
+    public QzSlideDatePicker setMaxYear(int maxYear) {
+        this.maxYear = maxYear;
         return this;
     }
 
