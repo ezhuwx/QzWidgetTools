@@ -1,7 +1,12 @@
 package com.qz.widget.chart.render
 
+import android.R.attr.text
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.text.Layout
+import android.text.StaticLayout
+import android.text.TextPaint
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
 import com.github.mikephil.charting.components.YAxis
@@ -10,6 +15,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBubbleDataSet
 import com.github.mikephil.charting.renderer.YAxisRenderer
 import com.github.mikephil.charting.utils.Utils
+import kotlin.math.abs
 
 /**
  * @author : ezhuwx
@@ -87,40 +93,55 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 val labelLineHeight = Utils.calcTextHeight(mLimitLinePaint, label).toFloat()
                 val xOffset = Utils.convertDpToPixel(4f) + line.xOffset
                 val yOffset = line.lineWidth + labelLineHeight + line.yOffset
+                //静态布局
+                val staticLayout = StaticLayout.Builder.obtain(
+                    label, 0, label.length,
+                    TextPaint(mLimitLinePaint),
+                    (mViewPortHandler.contentRight() - xOffset * 2).toInt()
+                ).apply {
+                    setIncludePad(false)
+                    setLineSpacing(0f, 1f)
+                    setAlignment(Layout.Alignment.ALIGN_NORMAL)
+                }.build()
+                //绘制文本
                 when (line.labelPosition) {
                     LimitLabelPosition.RIGHT_TOP -> {
                         mLimitLinePaint.textAlign = Paint.Align.RIGHT
-                        c.drawText(
-                            label,
+                        staticLayout.paint.textAlign = Paint.Align.RIGHT
+                        c.translate(
                             mViewPortHandler.contentRight() - xOffset,
-                            pts[1] - yOffset + labelLineHeight, mLimitLinePaint
+                            pts[1] - yOffset - staticLayout.height - mLimitLinePaint.ascent()
                         )
                     }
+
                     LimitLabelPosition.RIGHT_BOTTOM -> {
                         mLimitLinePaint.textAlign = Paint.Align.RIGHT
-                        c.drawText(
-                            label,
+                        staticLayout.paint.textAlign = Paint.Align.RIGHT
+                        c.translate(
                             mViewPortHandler.contentRight() - xOffset,
-                            pts[1] + yOffset, mLimitLinePaint
+                            pts[1] + yOffset + mLimitLinePaint.ascent()
                         )
                     }
+
                     LimitLabelPosition.LEFT_TOP -> {
                         mLimitLinePaint.textAlign = Paint.Align.LEFT
-                        c.drawText(
-                            label,
+                        staticLayout.paint.textAlign = Paint.Align.LEFT
+                        c.translate(
                             mViewPortHandler.contentLeft() + xOffset,
-                            pts[1] - yOffset + labelLineHeight, mLimitLinePaint
+                            pts[1] - yOffset - staticLayout.height - mLimitLinePaint.ascent()
                         )
                     }
+
                     else -> {
                         mLimitLinePaint.textAlign = Paint.Align.LEFT
-                        c.drawText(
-                            label,
-                            mViewPortHandler.offsetLeft() + xOffset,
-                            pts[1] + yOffset, mLimitLinePaint
+                        staticLayout.paint.textAlign = Paint.Align.LEFT
+                        c.translate(
+                            mViewPortHandler.contentLeft() + xOffset,
+                            pts[1] + yOffset + mLimitLinePaint.ascent()
                         )
                     }
                 }
+                staticLayout.draw(c)
             }
             c.restoreToCount(clipRestoreCount)
         }

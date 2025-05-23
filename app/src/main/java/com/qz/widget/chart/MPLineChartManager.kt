@@ -1,5 +1,7 @@
 package com.qz.widget.chart
 
+import android.R.attr.label
+import android.R.attr.value
 import android.content.Context
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -407,10 +409,10 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
     position: LimitLine.LimitLabelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP,
     lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
     lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
+    xOffset: Float = 5f, yOffset: Float = 5f,
     @ColorInt textColor: Int? = null
-) {
-    //添加限制线
-    yAxis.addLimitLine(LimitStyleLine(value, label).apply {
+): LimitLine {
+    val limitLine = LimitStyleLine(value, label).apply {
         this.textColor = textColor ?: color
         this.lineWidth = lineWidth
         this.lineColor = color
@@ -418,7 +420,12 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
         this.pointRadius = pointRadius
         this.enableDashedLine(lineLength, spaceLength, phase)
         this.labelPosition = position
-    })
+        this.xOffset = xOffset
+        this.yOffset = yOffset
+    }
+    //添加限制线
+    yAxis.addLimitLine(limitLine)
+    return limitLine
 }
 
 /**
