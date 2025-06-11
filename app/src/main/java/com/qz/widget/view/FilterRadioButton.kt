@@ -4,14 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.widget.RadioButton
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.TextViewCompat
 import com.qz.widget.R
@@ -96,7 +94,7 @@ class FilterRadioButton : RadioButton {
         //筛选图标
         setCompoundDrawablesWithIntrinsicBounds(
             null, null,
-            ResourcesCompat.getDrawable(resources, R.drawable.ic_pull_down, null),
+            ResourcesCompat.getDrawable(resources, R.drawable.ic_widget_pull_down, null),
             null
         )
         TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(color))

@@ -90,6 +90,11 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      * 无限制时间（可以选择，未来日期）
      */
     private boolean isShowFuture = false;
+
+    /**
+     * 结束时间可以大于开始时间
+     */
+    private boolean isCanStartGreater = false;
     /**
      * 选择的开始时间
      */
@@ -182,6 +187,10 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
             }
             assert selectedDate != null;
             selectedCl.setTime(selectedDate);
+            //补足年份
+            if (!isShowYear) {
+                selectedCl.set(Calendar.YEAR, Calendar.getInstance().get(Calendar.YEAR));
+            }
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -234,7 +243,7 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
                     //结束时间
                     long timeEnd = date.getTime();
                     //截止时间必须大于开始时间
-                    if (timeEnd > timeBegin) {
+                    if (isCanStartGreater || timeEnd > timeBegin) {
                         endTime = format.format(date);
                     } else {
                         isSelectedRight = false;
