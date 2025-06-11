@@ -298,6 +298,14 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
     }
 
     /**
+     * 结束时间可以大于开始时间
+     */
+    public QzSlideDatePicker isCanStartGreater() {
+        isCanStartGreater = true;
+        return this;
+    }
+
+    /**
      * 设置最早年份
      */
     public QzSlideDatePicker setMinYear(int miniYear) {
