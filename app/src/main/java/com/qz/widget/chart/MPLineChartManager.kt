@@ -309,7 +309,9 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     drawRightGridLine: Boolean = false,
     drawRightGridDashedLine: Boolean = false,
     labelCount: Int = 6,
-    isForceLabelCount: Boolean = true,
+    isForceLabelCount: Boolean = false,
+    isEnableGranularity: Boolean = false,
+    granularityValue: Float? = null,
 ) {
     //左边y轴峰谷计算
     val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit, labelCount)
@@ -335,7 +337,8 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
         setDrawAxisLine(drawLeftAxisLine)
         //等间距
-        isGranularityEnabled = false
+        isGranularityEnabled = isEnableGranularity
+        granularity = granularityValue ?: ((axisMaximum - axisMinimum) / labelCount)
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isLeftInverted
@@ -363,7 +366,8 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
         setDrawAxisLine(drawRightAxisLine)
         //等间距
-        isGranularityEnabled = false
+        isGranularityEnabled = isEnableGranularity
+        granularity = granularityValue ?: ((axisMaximum - axisMinimum) / labelCount)
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isRightInverted
@@ -578,8 +582,8 @@ fun BarChart.initBarChart(
     right: Float = 40f, bottom: Float = 40f,
     extraTop: Float = 10f,
     isLegendEnabled: Boolean = true,
-    xLabelSel: (Int) -> String,
-    xSubLabelSel: ((Int) -> String)? = null,
+    xLabelSel: (Int) -> String?,
+    xSubLabelSel: ((Int) -> String?)? = null,
     xColorSel: (Int) -> Int,
     onValueSel: ((Int) -> Unit)? = null,
     drawLeftAxisLine: Boolean = false,
@@ -627,6 +631,7 @@ fun BarChart.initBarChart(
     if (drawRightGridDashedLine) rightAxis.enableGridDashedLine(20f, 40f, 0f)
     rightAxis.axisMinimum = 0f
     rightAxis.spaceTop = 25f
+    rightAxis.isGranularityEnabled
     rightAxis.setDrawLabels(drawRightAxisLabels)
     //设置x坐标轴显示位置在下方
     xAxis.position = XAxis.XAxisPosition.BOTTOM
@@ -643,7 +648,7 @@ fun BarChart.initBarChart(
         //x轴渲染器
         setXAxisRenderer(XAxisHorizontalColorRenderer(this))
         xAxis.valueFormatter = object : ColorByValueFormatter() {
-            override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String ?{
                 val index = value.toInt()
                 return xLabelSel(index)
             }
@@ -660,7 +665,7 @@ fun BarChart.initBarChart(
         }
     } else {
         xAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
+            override fun getFormattedValue(value: Float): String ?{
                 val index = value.toInt()
                 return xLabelSel(index)
             }

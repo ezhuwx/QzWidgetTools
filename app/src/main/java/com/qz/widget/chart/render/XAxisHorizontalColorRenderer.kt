@@ -47,7 +47,9 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
             val y = positions[i + 1]
             if (mViewPortHandler.isInBoundsY(y)) {
                 val value = mXAxis.mEntries[i / 2]
-                val label = mXAxis.valueFormatter.getAxisLabel(value, mXAxis)
+                //主标签
+                val label: String? = mXAxis.valueFormatter.getAxisLabel(value, mXAxis)
+                //副标签
                 val subLabel = if (mXAxis.valueFormatter is ColorByValueFormatter)
                     (mXAxis.valueFormatter as ColorByValueFormatter).getSubXLabelValue(value) else null
                 //X轴标签颜色渲染
@@ -57,17 +59,15 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
                     mAxisLabelPaint.color = color
                 }
                 //文字绘制
-                if (subLabel == null) drawLabel(c, label, pos, y, anchor, labelRotationAngleDegrees)
-                else {
+                if (subLabel == null) drawLabel(
+                    c, label ?: "", pos, y, anchor, labelRotationAngleDegrees
+                ) else {
                     paintAxisLabels.typeface = Typeface.DEFAULT_BOLD
                     val labelY = y - paintAxisLabels.textSize / 2
                     drawLabel(c, label, pos, labelY, anchor, labelRotationAngleDegrees)
                     drawLabel(
-                        c,
-                        subLabel,
-                        pos,
-                        labelY + paintAxisLabels.textSize + 6f,
-                        anchor,
+                        c, subLabel, pos,
+                        labelY + paintAxisLabels.textSize + 6f, anchor,
                         labelRotationAngleDegrees
                     )
                 }

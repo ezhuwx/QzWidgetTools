@@ -13,29 +13,26 @@ import com.qz.widget.chart.formatter.ColorByValueFormatter
 class MultiLineLabelsXAxis : XAxis() {
     var fixedLabelCount: Int = 0
 
-    override fun getLongestLabel(): String {
-
-        var longest = ""
-
+    override fun getLongestLabel(): String? {
+        var longest: String? = null
         for (i in mEntries.indices) {
             val text = getFormattedLabel(i)
-            if (text != null && longest.length < text.length) longest = text
+            if (text != null && (longest?.length ?: 0) < text.length) longest = text
         }
-
         return longest
     }
 
     override fun getFormattedLabel(index: Int): String? {
-        return if (index < 0 || index >= mEntries.size) "" else {
-            val label = valueFormatter.getAxisLabel(
+        return if (index < 0 || index >= mEntries.size) null else {
+            val label: String? = valueFormatter.getAxisLabel(
                 mEntries[index], this
             )
             //副标签
             val subLabel = if (valueFormatter is ColorByValueFormatter) {
-                (valueFormatter as ColorByValueFormatter).getSubXLabelValue(mEntries[index]) ?: ""
-            } else ""
+                (valueFormatter as ColorByValueFormatter).getSubXLabelValue(mEntries[index])
+            } else null
             //返回相对较长文本
-            if (label.length > subLabel.length) label else subLabel
+            if ((label?.length ?: 0) > (subLabel?.length ?: 0)) label else subLabel
         }
     }
 

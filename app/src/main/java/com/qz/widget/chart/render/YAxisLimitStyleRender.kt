@@ -77,7 +77,7 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 //点数量
                 val pointCount = (length / (lineLength + spaceLength) / 4).toInt() + 1
                 var x = lineLength + spaceLength / 2
-                for (index in 1..pointCount) {
+                (1..pointCount).forEach { index ->
                     c.drawCircle(x, pts[1], line.pointRadius, mLimitLinePaint)
                     x += (lineLength + spaceLength) * 4
                 }
