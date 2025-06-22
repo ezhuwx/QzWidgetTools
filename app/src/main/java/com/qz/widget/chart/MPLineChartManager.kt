@@ -343,7 +343,8 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         //坐标轴反转
         isInverted = isLeftInverted
     }
-    rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
+    rendererLeftYAxis =
+        YAxisLimitStyleRender(this, axisLeft)
     //右边y轴峰谷计算
     val rightTicks = NiceTickUtil.generateNiceTicks(rightMin, rightMax, rightMiniUnit, labelCount)
     axisRight.isEnabled = rightTicks != null
@@ -414,7 +415,9 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
     lineWidth: Float = 1.5f, textSize: Float = 10f, pointRadius: Float = 8f,
     lineLength: Float = 20f, spaceLength: Float = 20f, phase: Float = 0f,
     xOffset: Float = 5f, yOffset: Float = 5f,
-    @ColorInt textColor: Int? = null
+    @ColorInt textColor: Int? = null,
+    limitPaddingStart: Float = 0f,
+    limitPaddingEnd: Float = 0f
 ): LimitLine {
     val limitLine = LimitStyleLine(value, label).apply {
         this.textColor = textColor ?: color
@@ -426,6 +429,8 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
         this.labelPosition = position
         this.xOffset = xOffset
         this.yOffset = yOffset
+        this.limitPaddingStart = limitPaddingStart
+        this.limitPaddingEnd = limitPaddingEnd
     }
     //添加限制线
     yAxis.addLimitLine(limitLine)
@@ -648,7 +653,7 @@ fun BarChart.initBarChart(
         //x轴渲染器
         setXAxisRenderer(XAxisHorizontalColorRenderer(this))
         xAxis.valueFormatter = object : ColorByValueFormatter() {
-            override fun getAxisLabel(value: Float, axis: AxisBase?): String ?{
+            override fun getAxisLabel(value: Float, axis: AxisBase?): String? {
                 val index = value.toInt()
                 return xLabelSel(index)
             }
@@ -665,7 +670,7 @@ fun BarChart.initBarChart(
         }
     } else {
         xAxis.valueFormatter = object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String ?{
+            override fun getFormattedValue(value: Float): String? {
                 val index = value.toInt()
                 return xLabelSel(index)
             }

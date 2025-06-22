@@ -32,6 +32,16 @@ class LimitStyleLine : LimitLine {
      */
     var pointColor = 0
 
+    /**
+     * 左侧边距
+     */
+    var limitPaddingStart: Float = 0f
+
+    /**
+     * 右侧边距
+     */
+    var limitPaddingEnd: Float = 0f
+
     constructor(limit: Float) : super(limit)
     constructor(limit: Float, label: String?) : super(limit, label)
 

@@ -1,6 +1,7 @@
 package com.qz.widget.chart.render
 
 import android.R.attr.text
+import android.R.attr.x
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
@@ -34,7 +35,7 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
 ) {
     override fun renderLimitLines(c: Canvas) {
         val limitLines = mYAxis.limitLines
-        if (limitLines == null || limitLines.size <= 0) {
+        if (limitLines == null || limitLines.isEmpty()) {
             return
         }
         val pts = mRenderLimitLinesBuffer
@@ -57,15 +58,20 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
             mLimitLinePaint.pathEffect = line.dashPathEffect
             pts[1] = line.limit
             mTrans.pointValuesToPixel(pts)
-            limitLinePath.moveTo(mViewPortHandler.contentLeft(), pts[1])
-            limitLinePath.lineTo(mViewPortHandler.contentRight(), pts[1])
+            //边距
+            val (limitPaddingStart, limitPaddingEnd) = if (line is LimitStyleLine) {
+                line.limitPaddingStart to line.limitPaddingEnd
+            } else 0f to 0f
+            limitLinePath.moveTo(mViewPortHandler.contentLeft() + limitPaddingStart, pts[1])
+            limitLinePath.lineTo(mViewPortHandler.contentRight() - limitPaddingEnd, pts[1])
             c.drawPath(limitLinePath, mLimitLinePaint)
             limitLinePath.reset()
             //画点
             if (line is LimitStyleLine) {
                 mLimitLinePaint.pathEffect = null
                 //总长度
-                val length = mViewPortHandler.contentRight() - mViewPortHandler.contentLeft()
+                val length =
+                    mViewPortHandler.contentRight() - limitPaddingEnd - mViewPortHandler.contentLeft() - limitPaddingStart
                 //线长
                 val lineLength = line.lineLength
                 //间隔长
@@ -76,7 +82,7 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 }
                 //点数量
                 val pointCount = (length / (lineLength + spaceLength) / 4).toInt() + 1
-                var x = lineLength + spaceLength / 2
+                var x = lineLength + spaceLength / 2 + limitPaddingStart
                 (1..pointCount).forEach { index ->
                     c.drawCircle(x, pts[1], line.pointRadius, mLimitLinePaint)
                     x += (lineLength + spaceLength) * 4
