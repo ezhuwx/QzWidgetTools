@@ -3,6 +3,7 @@ package com.qz.widget.chart.render
 import android.R.attr.text
 import android.R.attr.x
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.text.Layout
@@ -100,9 +101,17 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 val xOffset = Utils.convertDpToPixel(4f) + line.xOffset
                 val yOffset = line.lineWidth + labelLineHeight + line.yOffset
                 //静态布局
+                val textPaint =  Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    style = Paint.Style.STROKE
+                    style = line.textStyle
+                    color = line.textColor
+                    typeface = line.typeface
+                    textSize = line.textSize
+                    setShadowLayer(0.5f,0.5f,0.5f, Color.GRAY)
+                }
                 val staticLayout = StaticLayout.Builder.obtain(
                     label, 0, label.length,
-                    TextPaint(mLimitLinePaint),
+                    TextPaint(textPaint),
                     (mViewPortHandler.contentRight() - xOffset * 2).toInt()
                 ).apply {
                     setIncludePad(false)
