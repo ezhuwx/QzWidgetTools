@@ -310,8 +310,6 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     drawRightGridDashedLine: Boolean = false,
     labelCount: Int = 6,
     isForceLabelCount: Boolean = false,
-    isEnableGranularity: Boolean = false,
-    granularityValue: Float? = null,
 ) {
     //左边y轴峰谷计算
     val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit, labelCount)
@@ -336,9 +334,6 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         }
         setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
         setDrawAxisLine(drawLeftAxisLine)
-        //等间距
-        isGranularityEnabled = isEnableGranularity
-        granularity = granularityValue ?: ((axisMaximum - axisMinimum) / labelCount)
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isLeftInverted
@@ -366,9 +361,6 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
         }
         setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
         setDrawAxisLine(drawRightAxisLine)
-        //等间距
-        isGranularityEnabled = isEnableGranularity
-        granularity = granularityValue ?: ((axisMaximum - axisMinimum) / labelCount)
         setLabelCount(labelCount, isForceLabelCount)
         //坐标轴反转
         isInverted = isRightInverted
