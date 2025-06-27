@@ -20,13 +20,13 @@ class NiceTickUtil {
             min: Float? = null,
             max: Float? = null,
             miniUnit: Float? = null,
-            labelCount: Int,
+            intervalCount: Int,
         ): Pair<Float, Float>? {
             if (max != null && !max.isInfinite() && !max.isNaN() && max != Float.MIN_VALUE
                 && min != null && !min.isInfinite() && !min.isNaN() && min != Float.MAX_VALUE
             ) {
                 //间隔数
-                val intervalCount = labelCount - 1
+                val labelCount = intervalCount + 1
                 //最大值
                 var maxValue = max
                 //最小值

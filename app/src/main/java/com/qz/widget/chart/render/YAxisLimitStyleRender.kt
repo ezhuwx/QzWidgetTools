@@ -9,6 +9,7 @@ import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.util.Log.v
 import com.github.mikephil.charting.charts.BarLineChartBase
 import com.github.mikephil.charting.components.LimitLine.LimitLabelPosition
 import com.github.mikephil.charting.components.YAxis
@@ -18,6 +19,10 @@ import com.github.mikephil.charting.interfaces.datasets.IBarLineScatterCandleBub
 import com.github.mikephil.charting.renderer.YAxisRenderer
 import com.github.mikephil.charting.utils.Utils
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 /**
  * @author : ezhuwx
@@ -101,13 +106,13 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 val xOffset = Utils.convertDpToPixel(4f) + line.xOffset
                 val yOffset = line.lineWidth + labelLineHeight + line.yOffset
                 //静态布局
-                val textPaint =  Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     style = Paint.Style.STROKE
                     style = line.textStyle
                     color = line.textColor
                     typeface = line.typeface
                     textSize = line.textSize
-                    setShadowLayer(0.5f,0.5f,0.5f, Color.GRAY)
+                    setShadowLayer(0.5f, 0.5f, 0.5f, Color.GRAY)
                 }
                 val staticLayout = StaticLayout.Builder.obtain(
                     label, 0, label.length,
@@ -159,6 +164,118 @@ class YAxisLimitStyleRender<C : BarLineChartBase<out BarLineScatterCandleBubbleD
                 staticLayout.draw(c)
             }
             c.restoreToCount(clipRestoreCount)
+        }
+    }
+
+    override fun computeAxisValues(min: Float, max: Float) {
+
+        val yMin = min;
+        val yMax = max;
+
+        val labelCount = mAxis.labelCount - 1;
+        val range: Double = abs(yMax - yMin).toDouble();
+
+        if (labelCount == 0 || range <= 0 || range.isInfinite()) {
+            mAxis.mEntries = floatArrayOf()
+            mAxis.mCenteredEntries = floatArrayOf()
+            mAxis.mEntryCount = 0;
+            return;
+        }
+        // Find out how much spacing (in y value space) between axis values
+        val rawInterval: Double = range / labelCount;
+        var interval = Utils.roundToNextSignificant(rawInterval).toDouble();
+
+        // If granularity is enabled, then do not allow the interval to go below specified granularity.
+        // This is used to avoid repeated values when rounding values for display.
+        if (mAxis.isGranularityEnabled)
+            interval = if (interval < mAxis.granularity) mAxis.granularity.toDouble()
+            else interval
+
+        // Normalize interval
+        val intervalMagnitude = Utils.roundToNextSignificant(10.0.pow(log10(interval)));
+        val intervalSigDigit = (interval / intervalMagnitude)
+        if (intervalSigDigit > 5) {
+            // Use one order of magnitude higher, to avoid intervals like 0.9 or
+            // 90
+            interval = floor(10.0 * intervalMagnitude);
+        }
+
+        var n = if (mAxis.isCenterAxisLabelsEnabled) 1 else 0;
+
+        // force label count
+        if (mAxis.isForceLabelsEnabled) {
+
+            interval = range / (labelCount - 1);
+            mAxis.mEntryCount = labelCount;
+
+            if (mAxis.mEntries.size < labelCount) {
+                // Ensure stops contains at least numStops elements.
+                mAxis.mEntries = FloatArray(labelCount)
+            }
+
+            var v = min.toDouble();
+            for (i in 0 until labelCount) {
+                mAxis.mEntries[i] = v.toFloat();
+                v += interval;
+            }
+            n = labelCount;
+            // no forced count
+        } else {
+
+            var first = if (interval == 0.0) 0.0 else ceil(yMin / interval) * interval;
+            if (mAxis.isCenterAxisLabelsEnabled) {
+                first -= interval;
+            }
+            var last =
+                if (interval == 0.0) 0.0 else Utils.nextUp(floor(yMax / interval) * interval);
+            var f: Double;
+            var i : Int;
+
+            if (interval != 0.0) {
+                f = first
+                while (f <= last) {
+                    f += interval;
+                    ++n;
+                }
+            }
+
+            mAxis.mEntryCount = n;
+
+            if (mAxis.mEntries.size < n) {
+                // Ensure stops contains at least numStops elements.
+                mAxis.mEntries =  FloatArray(n);
+            }
+            var f2 = first
+            var i2 = 0
+            while (i2 < n) {
+                // 处理负零问题
+                if (f2 == 0.0) f = 0.0
+
+                mAxis.mEntries[i2] = f2.toFloat()
+
+                f2 += interval
+                i2++
+            }
+
+        }
+
+        // set decimals
+        if (interval < 1) {
+            mAxis.mDecimals =  ceil(-log10(interval)).toInt();
+        } else {
+            mAxis.mDecimals = 0;
+        }
+
+        if (mAxis.isCenterAxisLabelsEnabled) {
+
+            if (mAxis.mCenteredEntries.size < n) {
+                mAxis.mCenteredEntries =  FloatArray(n);
+            }
+
+            var offset =interval / 2f;
+
+            for ( i in 0 until  n)
+                mAxis.mCenteredEntries[i] = (mAxis.mEntries[i] + offset).toFloat()
         }
     }
 }
