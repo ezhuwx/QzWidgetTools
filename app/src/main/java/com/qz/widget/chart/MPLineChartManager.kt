@@ -1,7 +1,5 @@
 package com.qz.widget.chart
 
-import android.R.attr.label
-import android.R.attr.value
 import android.content.Context
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -310,62 +308,85 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     drawRightGridDashedLine: Boolean = false,
     labelCount: Int = 6,
     isForceLabelCount: Boolean = false,
+    isLeftWaterLevel: Boolean = false,
+    isRightWaterLevel: Boolean = false,
+    isLeftFlow: Boolean = false,
+    isRightFlow: Boolean = false,
 ) {
     //左边y轴峰谷计算
-    val leftTicks = NiceTickUtil.generateNiceTicks(leftMin, leftMax, leftMiniUnit, labelCount)
+    axisLeft.build(
+        leftMin, leftMax, leftNegativeEnable, leftMiniUnit, isLeftInverted,
+        leftColor, drawLeftAxisLine, drawLeftGridLine, drawLeftGridDashedLine,
+        labelCount, isForceLabelCount, isLeftWaterLevel, isLeftFlow,
+    )
+    rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
+    //右边y轴峰谷计算
+    axisRight.build(
+        rightMin, rightMax, rightNegativeEnable, rightMiniUnit, isRightInverted,
+        rightColor, drawRightAxisLine, drawRightGridLine, drawRightGridDashedLine,
+        labelCount, isForceLabelCount, isRightWaterLevel, isRightFlow,
+    )
+    rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
+}
+
+/**
+ * 构建Y轴
+ */
+private fun YAxis.build(
+    min: Float? = null,
+    max: Float? = null,
+    negativeEnable: Boolean = false,
+    miniUnit: Float? = null,
+    isInverted: Boolean = false,
+    @ColorInt color: Int? = null,
+    drawAxisLine: Boolean = true,
+    drawGridLine: Boolean = false,
+    drawGridDashedLine: Boolean = true,
+    labelCount: Int = 6,
+    isForceLabelCount: Boolean = false,
+    isWaterLevel: Boolean = false,
+    isFlow: Boolean = false,
+) {
+    //左边y轴峰谷计算
+    val (validMin, validMax, lftTicksSize) = when {
+        //水位刻度表
+        isWaterLevel -> WaterLevelTickUtil.generateWaterLevelTicks(
+            min, max, limitLines.map { it.limit },
+        )
+        //流量刻度表
+        isFlow -> FlowTickUtil.generateFlowTicks(
+            min, max, limitLines.map { it.limit }
+        )
+        //其它刻度表
+        else -> NiceTickUtil.generateNiceTicks(
+            min, max, miniUnit, labelCount,
+        )
+    } ?: Triple(min, max, labelCount)
     //设置左边y轴
-    axisLeft.isEnabled = leftTicks != null
-    if (axisLeft.isEnabled) axisLeft.run {
+    isEnabled = validMin != null && validMax != null
+    if (isEnabled) {
         setDrawAxisLine(false)
         axisLineWidth = 1f
         //设置最小值
-        axisMinimum = if (leftTicks!!.first >= 0 || leftNegativeEnable) leftTicks.first else 0f
+        axisMinimum = if (validMin!! >= 0f || negativeEnable) validMin else 0f
         //设置最大值
-        axisMaximum = leftTicks.second
+        axisMaximum = validMax!!
         //是否绘制0刻度线
-        setDrawZeroLine((leftMin ?: 0f) < 0f)
+        setDrawZeroLine(validMin < 0f)
         zeroLineColor = Color.BLACK
         zeroLineWidth = 0.5f
-        leftColor?.let { textColor = it }
+        color?.let { textColor = it }
         setDrawTopYLabelEntry(true)
         //是否绘制网格
-        if (drawLeftGridDashedLine) {
+        if (drawGridDashedLine) {
             setGridDashedLine(DashPathEffect(floatArrayOf(20f, 20f), 0f))
         }
-        setDrawGridLines(drawLeftGridLine || drawLeftGridDashedLine)
-        setDrawAxisLine(drawLeftAxisLine)
-        setLabelCount(labelCount, isForceLabelCount)
+        setDrawGridLines(drawGridLine || drawGridDashedLine)
+        setDrawAxisLine(drawAxisLine)
+        setLabelCount(lftTicksSize, isForceLabelCount)
         //坐标轴反转
-        isInverted = isLeftInverted
+        this.isInverted = isInverted
     }
-    rendererLeftYAxis =
-        YAxisLimitStyleRender(this, axisLeft)
-    //右边y轴峰谷计算
-    val rightTicks = NiceTickUtil.generateNiceTicks(rightMin, rightMax, rightMiniUnit, labelCount)
-    axisRight.isEnabled = rightTicks != null
-    if (axisRight.isEnabled) axisRight.run {
-        axisLineWidth = 1f
-        //设置最小值
-        axisMinimum = if (rightTicks!!.first >= 0 || rightNegativeEnable) rightTicks.first else 0f
-        //设置最大值
-        axisMaximum = rightTicks.second
-        //是否绘制0刻度线
-        setDrawZeroLine((rightMin ?: 0f) < 0)
-        zeroLineColor = Color.BLACK
-        zeroLineWidth = 0.5f
-        rightColor?.let { textColor = it }
-        setDrawTopYLabelEntry(true)
-        //是否绘制网格
-        if (drawRightGridDashedLine) {
-            setGridDashedLine(DashPathEffect(floatArrayOf(10f, 10f), 0f))
-        }
-        setDrawGridLines(drawRightGridLine || drawRightGridDashedLine)
-        setDrawAxisLine(drawRightAxisLine)
-        setLabelCount(labelCount, isForceLabelCount)
-        //坐标轴反转
-        isInverted = isRightInverted
-    }
-    rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
 }
 
 /**

@@ -6,7 +6,7 @@ import kotlin.math.*
 
 /**
  * @author : ezhuwx
- * Describe :
+ * Describe : 标准刻度计算工具类
  * Designed on 2023/2/10
  * E-mail : ezhuwx@163.com
  * Update on 15:43 by ezhuwx
@@ -21,7 +21,7 @@ class NiceTickUtil {
             max: Float? = null,
             miniUnit: Float? = null,
             labelCount: Int,
-        ): Pair<Float, Float>? {
+        ): Triple<Float, Float, Int>? {
             if (max != null && !max.isInfinite() && !max.isNaN() && max != Float.MIN_VALUE
                 && min != null && !min.isInfinite() && !min.isNaN() && min != Float.MAX_VALUE
             ) {
@@ -68,7 +68,7 @@ class NiceTickUtil {
                 if (maxTickValue - maxValue < epsilon) {
                     maxTickValue += tickUnit
                 }
-                return Pair(minTickValue, maxTickValue)
+                return Triple(minTickValue, maxTickValue,labelCount)
             } else return null
         }
 
