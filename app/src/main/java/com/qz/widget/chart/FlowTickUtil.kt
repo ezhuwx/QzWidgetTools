@@ -30,11 +30,13 @@ class FlowTickUtil {
                 && min != null && !min.isInfinite() && !min.isNaN() && min != Float.MAX_VALUE
             ) {
                 //确定实际范围
-                val actualMax = max(max, keyLevels.maxOrNull() ?: max)
+                var actualMax = max(max, keyLevels.maxOrNull() ?: max)
+                if ((actualMax - min) < 0.2) actualMax = min + 0.2f
                 //最小值计算
                 val minY = 0.0f
                 //带缓冲的最大值计算（10%缓冲）
                 val bufferedMax = actualMax * 1.1
+
                 //动态生成间隔
                 fun generateFriendlyIntervals(): Sequence<Double> = sequence {
                     val baseNumbers = arrayOf(0.2, 0.5, 1.0, 2.0, 5.0)
@@ -49,6 +51,7 @@ class FlowTickUtil {
                 // 4. 核心间隔计算（强制间隔≥0.2）
                 fun calculateInterval(): Double {
                     val range = bufferedMax - minY
+
                     //优先尝试原友好算法
                     fun originalFriendlyInterval(): Double? {
                         (4..9).forEach { targetIntervals ->
@@ -79,7 +82,7 @@ class FlowTickUtil {
                         .takeWhile { it <= range } // 防止无限大
                         .first { interval ->
                             val tickCount = ceil(bufferedMax / interval).toInt() + 1
-                            tickCount in 5..10 || interval > range/4  // 安全终止条件
+                            tickCount in 5..10 || interval > range / 4  // 安全终止条件
                         }
                 }
                 //计算最终参数

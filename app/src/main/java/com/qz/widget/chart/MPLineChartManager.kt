@@ -728,6 +728,7 @@ fun <T> BarChart.setBarChartData(
     gradientColor: GradientColor? = null,
     isDrawValue: Boolean = true,
     isDrawValueAboveBar: Boolean = true,
+    isRainFallTick: Boolean = false,
 ) {
     val buildData = buildBarChartData(
         legends,
@@ -741,6 +742,7 @@ fun <T> BarChart.setBarChartData(
         gradientColor = gradientColor,
         isDrawValue = isDrawValue,
         isDrawValueAboveBar = isDrawValueAboveBar,
+        isRainFallTick = isRainFallTick
     )
     data = buildData
     setDrawBarShadow(true)
@@ -761,6 +763,7 @@ fun <T> Chart<*>.buildBarChartData(
     xAxis: XAxis? = null,
     isDrawValue: Boolean = true,
     isDrawValueAboveBar: Boolean = true,
+    isRainFallTick: Boolean = false,
 ): BarData {
     val dataValuesList = arrayListOf<ArrayList<BarEntry>>()
     val valueColors = arrayListOf<Int>()
@@ -817,6 +820,11 @@ fun <T> Chart<*>.buildBarChartData(
         val xMinValue = dataOnly.minOf { it.x }
         data.barWidth *= (xMaxValue - xMinValue) / dataOnly.size.toFloat()
     }
+    //数据量较少时，调整柱状图宽度
+    if (dataValuesList.size == 1 && dataValuesList.first().size < 6) {
+        data.barWidth = dataValuesList.first().size / 10f
+        xAxis?.labelCount = dataValuesList.first().size
+    }
     //(起始点、柱状图组间距、柱状图之间间距)
     if (barAmount > 1) {
         data.groupBars(0f, groupSpace, barSpace)
@@ -850,6 +858,19 @@ fun <T> Chart<*>.buildBarChartData(
             return xValueColorFormatter?.invoke(value) ?: Color.TRANSPARENT
         }
     })
+    //雨量纵坐标控制
+    if (isRainFallTick) {
+        //雨量纵坐标计算
+        val (min, max, count) = RainfallTickUtil.generateTicks(
+            dataValuesList.flatten().map { it.y.toDouble() }
+        )
+        //雨量纵坐标配置
+        (this as? BarChart)?.axisLeft?.run {
+            axisMinimum = min
+            axisMaximum = max
+            setLabelCount(count, true)
+        }
+    }
     return data
 }
 
