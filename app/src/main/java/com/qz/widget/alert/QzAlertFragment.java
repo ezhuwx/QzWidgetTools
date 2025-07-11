@@ -43,7 +43,7 @@ import me.jessyan.autosize.utils.AutoSizeUtils;
  * Designed on 2018/8/15
  * E-mail : ezhuwx@163.com
  * Update on 10:04 by ezhuwx
- * version 1.0.0
+ * version 1.0.0
  */
 
 public class QzAlertFragment extends DialogFragment {

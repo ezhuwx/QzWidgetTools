@@ -52,15 +52,17 @@ class CustomPosLabelXAxis(viewPortHandler: ViewPortHandler, xAxis: XAxis, trans:
         while (i < positions.size) {
             var x = positions[i]
             if (mXAxis.isAvoidFirstLastClippingEnabled || mViewPortHandler.isInBoundsX(x)) {
-                val label =
-                    mXAxis.valueFormatter.getAxisLabel(
-                        if (customShowValues == null) mXAxis.mEntries[i / 2]
-                        else customShowValues!![i / 2], mXAxis
-                    )
+                val label = mXAxis.valueFormatter.getAxisLabel(
+                    if (customShowValues == null) mXAxis.mEntries[i / 2]
+                    else customShowValues!![i / 2], mXAxis
+                )
+                val lines = label.split("\n")
                 if (mXAxis.isAvoidFirstLastClippingEnabled) {
                     // avoid clipping of the last
                     if (i / 2 == entrySize - 1 && entrySize > 1) {
-                        val width = Utils.calcTextWidth(mAxisLabelPaint, label).toFloat()
+                        val width = Utils.calcTextWidth(
+                            mAxisLabelPaint, lines.maxBy { it.length }
+                        ).toFloat()
                         if (width > mViewPortHandler.offsetRight() * 2f
                             && x + width > mViewPortHandler.chartWidth
                         ) x -= width / 2f
@@ -69,7 +71,6 @@ class CustomPosLabelXAxis(viewPortHandler: ViewPortHandler, xAxis: XAxis, trans:
                         x += 10f
                     }
                 }
-                val lines = label.split("\n")
                 for (lineIndex in lines.indices) {
                     val yOffset = lineIndex * mAxisLabelPaint.textSize
                     drawLabel(

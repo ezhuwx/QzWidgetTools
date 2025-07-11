@@ -33,6 +33,9 @@ import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
+import androidx.core.graphics.toColorInt
+import androidx.core.content.withStyledAttributes
+import androidx.core.graphics.createBitmap
 
 
 /**
@@ -70,7 +73,7 @@ class EditBorderLayout(
     /**
      * 文字大小 px
      */
-    private var textStrSize: Float =  AutoSizeUtils.dp2px(context, 14f).toFloat(),
+    private var textStrSize: Float = AutoSizeUtils.dp2px(context, 14f).toFloat(),
     /**
      * 提示文字与文字间距
      */
@@ -94,7 +97,7 @@ class EditBorderLayout(
     /**
      * 提示文字颜色
      */
-    private var hintUnEnabledColor: Int = Color.parseColor("#90000000"),
+    private var hintUnEnabledColor: Int = "#90000000".toColorInt(),
     /**
      * 错误文字
      */
@@ -102,7 +105,7 @@ class EditBorderLayout(
     /**
      * 错误颜色
      */
-    private var errorColor: Int = Color.parseColor("#DC143C"),
+    private var errorColor: Int = "#DC143C".toColorInt(),
     /**
      * 文字左边距 px
      */
@@ -200,106 +203,106 @@ class EditBorderLayout(
      */
     private fun initAttrs(context: Context, attrs: AttributeSet?, defStyleAttr: Int) {
         //获取自定义属性。
-        val typedArray = context.obtainStyledAttributes(
+        context.withStyledAttributes(
             attrs, R.styleable.EditBorderLayout, defStyleAttr, 0
-        )
-        //边框
-        //边框颜色
-        boxStrokeColor = typedArray.getColor(
-            R.styleable.EditBorderLayout_boxStrokeColor, boxStrokeColor
-        )
-        //聚焦边框颜色
-        boxStrokeFocusedColor = typedArray.getColor(
-            R.styleable.EditBorderLayout_boxStrokeFocusedColor, boxStrokeFocusedColor
-        )
-        //边框圆角
-        boxCornerRadius = typedArray.getDimension(
-            R.styleable.EditBorderLayout_boxCornerRadius, boxCornerRadius
-        )
-        //边框宽度
-        boxStrokeWidth = typedArray.getDimension(
-            R.styleable.EditBorderLayout_boxStrokeWidth, boxStrokeWidth
-        )
-        //文字
-        //输入框文字
-        textStr = typedArray.getString(R.styleable.EditBorderLayout_textStr) ?: textStr
-        //输入框文字颜色
-        textStrColor = typedArray.getColor(R.styleable.EditBorderLayout_textColor, textStrColor)
-        //输入框文字大小
-        textStrSize = typedArray.getDimension(R.styleable.EditBorderLayout_textSize, textStrSize)
-        //输入框文字最大行数
-        textMaxLines = typedArray.getInteger(
-            R.styleable.EditBorderLayout_textMaxLines, textMaxLines
-        )
-        //输入长度
-        maxLength = typedArray.getInteger(
-            R.styleable.EditBorderLayout_android_maxLength, maxLength
-        )
-        //输入类型
-        editInputType = typedArray.getInteger(
-            R.styleable.EditBorderLayout_android_inputType, editInputType
-        )
-        //输入字符
-        digits = typedArray.getString(R.styleable.EditBorderLayout_android_digits) ?: digits
-        //键盘类型
-        imeOptions = typedArray.getInteger(
-            R.styleable.EditBorderLayout_android_imeOptions, imeOptions
-        )
-        //输入框文字内边距
-        textPaddingStart = typedArray.getDimension(
-            R.styleable.EditBorderLayout_textPaddingStart, textPaddingStart
-        )
-        //输入框文字内边距
-        textPaddingTop = typedArray.getDimension(
-            R.styleable.EditBorderLayout_textPaddingTop, textPaddingTop
-        )
-        //输入框文字内边距
-        textPaddingEnd = typedArray.getDimension(
-            R.styleable.EditBorderLayout_textPaddingEnd, textPaddingEnd
-        )
-        //输入框文字内边距
-        textPaddingBottom = typedArray.getDimension(
-            R.styleable.EditBorderLayout_textPaddingBottom, textPaddingBottom
-        )
-        //提示文字
-        hintStr = typedArray.getString(
-            R.styleable.EditBorderLayout_hintText,
-        ) ?: hintStr
-        //提示文字颜色
-        hintUnEnabledColor = typedArray.getColor(
-            R.styleable.EditBorderLayout_hintUnEnableColor, hintUnEnabledColor
-        )
-        //必填文字
-        isRequired = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_isRequired, isRequired
-        )
-        //错误文字
-        errorStr = typedArray.getString(R.styleable.EditBorderLayout_errorText) ?: errorStr
-        //错误颜色
-        errorColor = typedArray.getColor(
-            R.styleable.EditBorderLayout_errorColor, errorColor
-        )
-        //是否可编辑
-        isEditable = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_editable, isEditable
-        )
-        //是否启用
-        isEnabled = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_enabled, isEnabled
-        )
-        //焦点全选
-        selectAllOnFocus = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_android_selectAllOnFocus, selectAllOnFocus
-        )
-        //可选文本
-        selectable = typedArray.getBoolean(
-            R.styleable.EditBorderLayout_android_selectable, selectable
-        )
-        //内容位置
-        gravity = typedArray.getInt(
-            R.styleable.EditBorderLayout_android_gravity, gravity
-        )
-        typedArray.recycle()
+        ) {
+            //边框
+            //边框颜色
+            boxStrokeColor = getColor(
+                R.styleable.EditBorderLayout_boxStrokeColor, boxStrokeColor
+            )
+            //聚焦边框颜色
+            boxStrokeFocusedColor = getColor(
+                R.styleable.EditBorderLayout_boxStrokeFocusedColor, boxStrokeFocusedColor
+            )
+            //边框圆角
+            boxCornerRadius = getDimension(
+                R.styleable.EditBorderLayout_boxCornerRadius, boxCornerRadius
+            )
+            //边框宽度
+            boxStrokeWidth = getDimension(
+                R.styleable.EditBorderLayout_boxStrokeWidth, boxStrokeWidth
+            )
+            //文字
+            //输入框文字
+            textStr = getString(R.styleable.EditBorderLayout_textStr) ?: textStr
+            //输入框文字颜色
+            textStrColor = getColor(R.styleable.EditBorderLayout_textColor, textStrColor)
+            //输入框文字大小
+            textStrSize = getDimension(R.styleable.EditBorderLayout_textSize, textStrSize)
+            //输入框文字最大行数
+            textMaxLines = getInteger(
+                R.styleable.EditBorderLayout_textMaxLines, textMaxLines
+            )
+            //输入长度
+            maxLength = getInteger(
+                R.styleable.EditBorderLayout_android_maxLength, maxLength
+            )
+            //输入类型
+            editInputType = getInteger(
+                R.styleable.EditBorderLayout_android_inputType, editInputType
+            )
+            //输入字符
+            digits = getString(R.styleable.EditBorderLayout_android_digits) ?: digits
+            //键盘类型
+            imeOptions = getInteger(
+                R.styleable.EditBorderLayout_android_imeOptions, imeOptions
+            )
+            //输入框文字内边距
+            textPaddingStart = getDimension(
+                R.styleable.EditBorderLayout_textPaddingStart, textPaddingStart
+            )
+            //输入框文字内边距
+            textPaddingTop = getDimension(
+                R.styleable.EditBorderLayout_textPaddingTop, textPaddingTop
+            )
+            //输入框文字内边距
+            textPaddingEnd = getDimension(
+                R.styleable.EditBorderLayout_textPaddingEnd, textPaddingEnd
+            )
+            //输入框文字内边距
+            textPaddingBottom = getDimension(
+                R.styleable.EditBorderLayout_textPaddingBottom, textPaddingBottom
+            )
+            //提示文字
+            hintStr = getString(
+                R.styleable.EditBorderLayout_hintText,
+            ) ?: hintStr
+            //提示文字颜色
+            hintUnEnabledColor = getColor(
+                R.styleable.EditBorderLayout_hintUnEnableColor, hintUnEnabledColor
+            )
+            //必填文字
+            isRequired = getBoolean(
+                R.styleable.EditBorderLayout_isRequired, isRequired
+            )
+            //错误文字
+            errorStr = getString(R.styleable.EditBorderLayout_errorText) ?: errorStr
+            //错误颜色
+            errorColor = getColor(
+                R.styleable.EditBorderLayout_errorColor, errorColor
+            )
+            //是否可编辑
+            isEditable = getBoolean(
+                R.styleable.EditBorderLayout_editable, isEditable
+            )
+            //是否启用
+            isEnabled = getBoolean(
+                R.styleable.EditBorderLayout_enabled, isEnabled
+            )
+            //焦点全选
+            selectAllOnFocus = getBoolean(
+                R.styleable.EditBorderLayout_android_selectAllOnFocus, selectAllOnFocus
+            )
+            //可选文本
+            selectable = getBoolean(
+                R.styleable.EditBorderLayout_android_selectable, selectable
+            )
+            //内容位置
+            gravity = getInt(
+                R.styleable.EditBorderLayout_android_gravity, gravity
+            )
+        }
         //边框画笔
         borderPaint = Paint()
         borderPaint.isAntiAlias = true
@@ -416,8 +419,7 @@ class EditBorderLayout(
     private fun onReSetCanvas() {
         cacheBitmap?.recycle()
         cacheBitmap = null
-        cacheBitmap =
-            Bitmap.createBitmap(measuredWidth, measuredHeight, Bitmap.Config.ARGB_8888)
+        cacheBitmap = createBitmap(measuredWidth, measuredHeight)
         cacheCanvas = Canvas(cacheBitmap!!)
     }
 
@@ -615,7 +617,7 @@ class EditBorderLayout(
             this.isEnabled = isEnabled
             setTextIsSelectable(selectable && !isEnabled)
         }
-        borderPaint.color = if (isEnabled) boxStrokeColor else Color.parseColor("#E3E3E3")
+        borderPaint.color = if (isEnabled) boxStrokeColor else "#E3E3E3".toColorInt()
         //选择尾标
         if (!isEditable) textView?.run {
             val selPic = AppCompatResources.getDrawable(context, R.drawable.ic_arrow_down)

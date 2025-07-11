@@ -1,5 +1,6 @@
 package com.qz.widget.chart
 
+import android.R.attr.data
 import android.content.Context
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -38,6 +39,12 @@ import com.qz.widget.chart.formatter.ColorByValueFormatter
 import com.qz.widget.chart.render.LimitStyleLine
 import com.qz.widget.chart.render.XAxisHorizontalColorRenderer
 import com.qz.widget.chart.render.YAxisLimitStyleRender
+import com.qz.widget.chart.tickUtils.FlowTickUtil
+import com.qz.widget.chart.tickUtils.NiceTickUtil
+import com.qz.widget.chart.tickUtils.RainfallTickUtil
+import com.qz.widget.chart.tickUtils.WaterLevelTickUtil
+import com.qz.widget.chart.tickUtils.YTickType
+import com.qz.widget.chart.tickUtils.YTickType.Companion.generateTicks
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -280,7 +287,7 @@ fun <T : BarLineData> BarLineChartBase<T>.setXAxis(
         labelRotationAngle = 0f
         //是否绘制X轴的网格线
         setDrawAxisLine(drawAxisLine)
-        setLabelCount(6, true)
+        setLabelCount(6, false)
     }
 }
 
@@ -308,23 +315,21 @@ fun <T : BarLineData> BarLineChartBase<T>.setYAxis(
     drawRightGridDashedLine: Boolean = false,
     labelCount: Int = 6,
     isForceLabelCount: Boolean = false,
-    isLeftWaterLevel: Boolean = false,
-    isRightWaterLevel: Boolean = false,
-    isLeftFlow: Boolean = false,
-    isRightFlow: Boolean = false,
+    leftYTickType: YTickType? = null,
+    rightYTickType: YTickType? = null,
 ) {
     //左边y轴峰谷计算
     axisLeft.build(
         leftMin, leftMax, leftNegativeEnable, leftMiniUnit, isLeftInverted,
         leftColor, drawLeftAxisLine, drawLeftGridLine, drawLeftGridDashedLine,
-        labelCount, isForceLabelCount, isLeftWaterLevel, isLeftFlow,
+        labelCount, isForceLabelCount, leftYTickType,
     )
     rendererLeftYAxis = YAxisLimitStyleRender(this, axisLeft)
     //右边y轴峰谷计算
     axisRight.build(
         rightMin, rightMax, rightNegativeEnable, rightMiniUnit, isRightInverted,
         rightColor, drawRightAxisLine, drawRightGridLine, drawRightGridDashedLine,
-        labelCount, isForceLabelCount, isRightWaterLevel, isRightFlow,
+        labelCount, isForceLabelCount, rightYTickType,
     )
     rendererRightYAxis = YAxisLimitStyleRender(this, axisRight)
 }
@@ -344,24 +349,12 @@ private fun YAxis.build(
     drawGridDashedLine: Boolean = true,
     labelCount: Int = 6,
     isForceLabelCount: Boolean = false,
-    isWaterLevel: Boolean = false,
-    isFlow: Boolean = false,
+    tickType: YTickType? = null,
 ) {
     //左边y轴峰谷计算
-    val (validMin, validMax, lftTicksSize) = when {
-        //水位刻度表
-        isWaterLevel -> WaterLevelTickUtil.generateWaterLevelTicks(
-            min, max, limitLines.map { it.limit },
-        )
-        //流量刻度表
-        isFlow -> FlowTickUtil.generateFlowTicks(
-            min, max, limitLines.map { it.limit }
-        )
-        //其它刻度表
-        else -> NiceTickUtil.generateNiceTicks(
-            min, max, miniUnit, labelCount,
-        )
-    } ?: Triple(min, max, labelCount)
+    val (validMin, validMax, lftTicksSize) = tickType.generateTicks(
+        min, max, miniUnit, labelCount, limitLines.map { it.limit }
+    ) ?: Triple(min, max, labelCount)
     //设置左边y轴
     isEnabled = validMin != null && validMax != null
     if (isEnabled) {
@@ -386,7 +379,36 @@ private fun YAxis.build(
         setLabelCount(lftTicksSize, isForceLabelCount)
         //坐标轴反转
         this.isInverted = isInverted
+        //设置Y轴刻度格式化
+        if (tickType != null && tickType != YTickType.OTHER) {
+            valueFormatter = object : ValueFormatter() {
+                override fun getFormattedValue(value: Float): String {
+                    return when (tickType) {
+                        YTickType.RAINFALL -> "%.1f".format(value)
+                        YTickType.WATER_LEVEL -> "%.2f".format(value)
+                        YTickType.FLOW -> value.flowFormat()
+                        else -> value.toString()
+                    }
+                }
+            }
+        }
     }
+}
+
+/**
+ * 流量格式化
+ * */
+private fun Float?.flowFormat(): String {
+    val flow: Float? = this
+    //空值处理
+    return if (flow == null || flow.isNaN() || flow.isInfinite()) "-"
+    else when {
+        flow == 0f -> "0"
+        flow >= 100 -> "%.0f"
+        flow >= 10 -> "%.1f"
+        flow >= 1 -> "%.2f"
+        else -> "%.3f"
+    }.format(flow)
 }
 
 /**
@@ -862,10 +884,10 @@ fun <T> Chart<*>.buildBarChartData(
     if (isRainFallTick) {
         //雨量纵坐标计算
         val (min, max, count) = RainfallTickUtil.generateTicks(
-            dataValuesList.flatten().map { it.y.toDouble() }
+            data = dataValuesList.flatten().map { it.y }
         )
         //雨量纵坐标配置
-        (this as? BarChart)?.axisLeft?.run {
+        (this as? BarChart)?.getAxis(yAxisDependency)?.run {
             axisMinimum = min
             axisMaximum = max
             setLabelCount(count, true)

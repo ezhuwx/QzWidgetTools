@@ -1,4 +1,4 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.tickUtils
 
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -16,7 +16,7 @@ class NiceTickUtil {
         /**
          * 获取均匀分布的刻度值
          */
-        fun generateNiceTicks(
+        fun generateTicks(
             min: Float? = null,
             max: Float? = null,
             miniUnit: Float? = null,

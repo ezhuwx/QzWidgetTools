@@ -14,12 +14,13 @@ import com.github.mikephil.charting.utils.ViewPortHandler
  * Designed on 2021/6/23 0023
  * E-mail : ezhuwx@163.com
  * Update on 17:02 by ezhuwx
- * version 2.0.0
+ * version 2.0.0
  */
 class HighValuesLegendCombinedRenderer(
     chart: CombinedChart?,
     animator: ChartAnimator?,
-    viewPortHandler: ViewPortHandler?
+    viewPortHandler: ViewPortHandler?,
+    val isRoundedCorner: Boolean = true
 ) : CombinedChartRenderer(chart, animator, viewPortHandler) {
     override fun createRenderers() {
         super.createRenderers()
@@ -31,7 +32,7 @@ class HighValuesLegendCombinedRenderer(
                     mViewPortHandler
                 )
             }
-            if (dataRenderer is BarChartRenderer) {
+            if (dataRenderer is BarChartRenderer && isRoundedCorner) {
                 mRenderers[index] = RectBarChartRender(
                     mChart.get() as CombinedDataProvider,
                     mAnimator,

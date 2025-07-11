@@ -24,7 +24,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
  * Designed on 2018/6/7
  * E-mail : ezhuwx@163.com
  * @ on 17:21 by ezhuwx
- * version 2.0.3
+ * version 2.0.3
  */
 public abstract class QzBaseBottomSheetDialog extends BottomSheetDialogFragment {
     private static final String TAG = BottomSheetDialogFragment.class.getSimpleName();

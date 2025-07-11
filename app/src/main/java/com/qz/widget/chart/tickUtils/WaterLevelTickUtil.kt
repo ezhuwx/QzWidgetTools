@@ -1,11 +1,9 @@
-package com.qz.widget.chart
+package com.qz.widget.chart.tickUtils
 
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.pow
-import kotlin.math.roundToInt
 
 /**
  * @author : ezhuwx
@@ -20,7 +18,7 @@ class WaterLevelTickUtil {
         /**
          * 生成水位刻度表
          */
-        fun generateWaterLevelTicks(
+        fun generateTicks(
             min: Float?,
             max: Float?,
             keyLevels: List<Float> = emptyList(),

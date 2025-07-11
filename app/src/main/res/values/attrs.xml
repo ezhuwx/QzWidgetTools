@@ -58,4 +58,9 @@
         <!--内容位置-->
         <attr name="android:gravity" />
     </declare-styleable>
+
+    <declare-styleable name="HighValuesCombinedChart">
+        <!--是否圆角-->
+        <attr name="isRoundedCorner" format="boolean" />
+    </declare-styleable>
 </resources>

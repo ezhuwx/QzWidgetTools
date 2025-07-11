@@ -14,7 +14,7 @@ import com.qz.widget.R
  * Designed on 2021/8/20 0020
  * E-mail : ezhuwx@163.com
  * Update on 13:43 by ezhuwx
- * version 
+ * version
  */
 class FilterCommonAdapter(
     private val isHadChildren: Boolean,

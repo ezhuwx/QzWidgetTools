@@ -12,6 +12,7 @@ import com.qz.widget.chart.axis.CustomPosLabelXAxis
 import com.qz.widget.chart.render.HighValuesLegendCombinedRenderer
 import com.qz.widget.chart.render.HighValuesLegendRenderer
 import me.jessyan.autosize.AutoSizeCompat
+import androidx.core.content.withStyledAttributes
 
 /**
  * @author : ezhuwx
@@ -19,25 +20,36 @@ import me.jessyan.autosize.AutoSizeCompat
  * Designed on 2021/6/23 0023
  * E-mail : ezhuwx@163.com
  * Update on 17:00 by ezhuwx
- * version 2.0.0
+ * version 2.0.0
  */
-class HighValuesCombinedChart: CombinedChart {
+class HighValuesCombinedChart : CombinedChart {
     private lateinit var xRenter: CustomPosLabelXAxis
-    private var onHighLightChangeListener: HighValuesLegendRenderer.OnHighLightChangeListener? = null
+
+    /**
+     * 是否圆角
+     */
+    private var isRoundedCorner = true
+    fun isRoundedCorner(): Boolean {
+        return isRoundedCorner
+    }
+
+    private var onHighLightChangeListener:
+            HighValuesLegendRenderer.OnHighLightChangeListener? = null
+
     constructor(context: Context) : super(context) {
         initRenderSet(context)
     }
 
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        initRenderSet(context)
+        initRenderSet(context, attrs)
     }
 
-    constructor(context: Context, attrs: AttributeSet?, defStyle: Int) : super(
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(
         context,
         attrs,
-        defStyle
+        defStyleAttr
     ) {
-        initRenderSet(context)
+        initRenderSet(context, attrs, defStyleAttr)
     }
 
     override fun setData(data: CombinedData?) {
@@ -48,11 +60,27 @@ class HighValuesCombinedChart: CombinedChart {
             }
         }
     }
-    private fun initRenderSet(context: Context) {
+
+    private fun initRenderSet(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
+    ) {
+        //获取自定义属性。
+        context.withStyledAttributes(
+            attrs, R.styleable.HighValuesCombinedChart, defStyleAttr, 0
+        ) {
+            //是否圆角
+            isRoundedCorner = getBoolean(
+                R.styleable.HighValuesCombinedChart_isRoundedCorner, isRoundedCorner
+            )
+        }
+        //默认文字
         setNoDataText(context.getString(R.string.empty_data))
         setNoDataTextColor(Color.BLACK)
         //高亮渲染
-        mRenderer = HighValuesLegendCombinedRenderer(this, mAnimator, mViewPortHandler)
+        mRenderer =
+            HighValuesLegendCombinedRenderer(this, mAnimator, mViewPortHandler, isRoundedCorner)
         //X轴渲染
         xRenter = CustomPosLabelXAxis(
             viewPortHandler,

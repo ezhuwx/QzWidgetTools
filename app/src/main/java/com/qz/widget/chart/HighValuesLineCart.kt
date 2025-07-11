@@ -17,7 +17,7 @@ import me.jessyan.autosize.AutoSizeCompat
  * Designed on 2021/6/23 0023
  * E-mail : ezhuwx@163.com
  * Update on 17:00 by ezhuwx
- * version 2.0.0
+ * version 2.0.0
  */
 class HighValuesLineCart : LineChart {
 
