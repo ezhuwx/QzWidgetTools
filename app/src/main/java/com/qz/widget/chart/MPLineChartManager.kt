@@ -844,7 +844,7 @@ fun <T> Chart<*>.buildBarChartData(
     }
     //数据量较少时，调整柱状图宽度
     if (dataValuesList.size == 1 && dataValuesList.first().size < 6) {
-        data.barWidth = dataValuesList.first().size / 10f
+        data.barWidth = 6 / 10f
         xAxis?.labelCount = dataValuesList.first().size
     }
     //(起始点、柱状图组间距、柱状图之间间距)
