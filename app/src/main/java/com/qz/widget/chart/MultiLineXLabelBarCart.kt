@@ -6,10 +6,8 @@ import android.graphics.Color
 import android.util.AttributeSet
 import com.github.mikephil.charting.charts.BarChart
 import com.qz.widget.R
-import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.YAxis
-import com.qz.widget.chart.axis.CustomPosLabelXAxis
-import com.qz.widget.chart.render.HighValuesLegendRenderer
+import com.qz.widget.chart.render.CustomPosLabelXAxisRender
 import me.jessyan.autosize.AutoSizeCompat
 
 /**
@@ -21,7 +19,7 @@ import me.jessyan.autosize.AutoSizeCompat
  * version 2.0.0
  */
 class MultiLineXLabelBarCart : BarChart {
-    private lateinit var xRenter: CustomPosLabelXAxis
+    private lateinit var xRenter: CustomPosLabelXAxisRender
 
     constructor(context: Context) : super(context) {
         initRenderSet(context)
@@ -43,7 +41,7 @@ class MultiLineXLabelBarCart : BarChart {
         setNoDataText(context.getString(R.string.empty_data))
         setNoDataTextColor(Color.BLACK)
         //X轴渲染   //X轴渲染
-        xRenter = CustomPosLabelXAxis(
+        xRenter = CustomPosLabelXAxisRender(
             viewPortHandler,
             xAxis,
             getTransformer(YAxis.AxisDependency.LEFT)

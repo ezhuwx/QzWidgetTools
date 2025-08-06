@@ -13,7 +13,7 @@ import com.github.mikephil.charting.utils.ViewPortHandler
  * E-mail : ezhuwx@163.com
  * Update on 15:44 by ezhuwx
  */
-class HorizontalBarMultiColorValueRender(
+class HorizontalMultiColorBarValueRender(
     chart: BarDataProvider?,
     animator: ChartAnimator?,
     viewPortHandler: ViewPortHandler?

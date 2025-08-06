@@ -10,6 +10,10 @@ import com.github.mikephil.charting.utils.Utils
 import com.qz.widget.chart.formatter.ColorByValueFormatter
 import com.qz.widget.chart.axis.MultiLineLabelsXAxis
 import kotlin.math.abs
+import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log10
+import kotlin.math.pow
 
 /**
  * @author : ezhuwx
@@ -18,12 +22,16 @@ import kotlin.math.abs
  * E-mail : ezhuwx@163.com
  * Update on 8:58 by ezhuwx
  */
-class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBarChart(
+class HorizontalMultiColorBarXAxisRender(chart: BarChart) : XAxisRendererHorizontalBarChart(
     chart.viewPortHandler,
     chart.xAxis,
     chart.getTransformer(YAxis.AxisDependency.LEFT),
     chart
 ) {
+    /**
+     * 是否全显示X轴标签
+     */
+    var fullXLabelCount: Int? = null
 
     override fun drawLabels(c: Canvas, pos: Float, anchor: MPPointF) {
         val labelRotationAngleDegrees = mXAxis.labelRotationAngle
@@ -77,9 +85,7 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
     }
 
     override fun computeAxisValues(min: Float, max: Float) {
-        val labelCount =
-            if (mAxis is MultiLineLabelsXAxis) (mAxis as MultiLineLabelsXAxis).fixedLabelCount
-            else mAxis.labelCount
+        val labelCount = fullXLabelCount ?: mAxis.labelCount
         val range = abs(max - min).toDouble()
 
         if (labelCount == 0 || range <= 0 || java.lang.Double.isInfinite(range)) {
@@ -108,13 +114,13 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
 
         // Normalize interval
         val intervalMagnitude =
-            Utils.roundToNextSignificant(Math.pow(10.0, Math.log10(interval).toInt().toDouble()))
+            Utils.roundToNextSignificant(10.0.pow(log10(interval).toInt().toDouble()))
                 .toDouble()
         val intervalSigDigit = (interval / intervalMagnitude).toInt()
         if (intervalSigDigit > 5) {
             // Use one order of magnitude higher, to avoid intervals like 0.9 or
             // 90
-            interval = Math.floor(10 * intervalMagnitude)
+            interval = floor(10 * intervalMagnitude)
         }
 
         var n = if (mAxis.isCenterAxisLabelsEnabled) 1 else 0
@@ -138,17 +144,14 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
 
             // no forced count
         } else {
-            var first = if (interval == 0.0) 0.0 else Math.ceil(min / interval) * interval
+            var first = if (interval == 0.0) 0.0 else ceil(min / interval) * interval
             if (mAxis.isCenterAxisLabelsEnabled) {
                 first -= interval
             }
             val last = if (interval == 0.0) 0.0 else Utils.nextUp(
-                Math.floor(
-                    max / interval
-                ) * interval
+                floor(max / interval) * interval
             )
             var f: Double
-            var i: Int
             if (interval != 0.0) {
                 f = first
                 while (f <= last) {
@@ -162,7 +165,7 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
                 mAxis.mEntries = FloatArray(n)
             }
             f = first
-            i = 0
+            var i = 0
             while (i < n) {
                 if (f == 0.0) // Fix for negative zero case (Where value == -0.0, and 0.0 == -0.0)
                     f = 0.0
@@ -176,7 +179,7 @@ class XAxisHorizontalColorRenderer(chart: BarChart) : XAxisRendererHorizontalBar
 
         // set decimals
         if (interval < 1) {
-            mAxis.mDecimals = Math.ceil(-Math.log10(interval)).toInt()
+            mAxis.mDecimals = ceil(-log10(interval)).toInt()
         } else {
             mAxis.mDecimals = 0
         }

@@ -54,7 +54,7 @@ class MultiSelManager(
         selAllTv.isVisible = isHadTopSel || !configuration.isHadChildren
         selAllTv.setOnClickListener {
             //多级多选，模拟顶级控件点击
-            if (isHadTopSel) onMultiLevelChangeSelAll(!isSelected)
+            if (configuration.isHadChildren) onMultiLevelChangeSelAll(!isSelected)
             //单级多选
             else {
                 //清空
@@ -155,6 +155,7 @@ class MultiSelManager(
             multiParentAdapter?.setSelIds(configuration.multiParentIds)
         } else {
             topItemCb.isChecked = false
+            configuration.selIdResult = null
             configuration.multiParentIds?.clear()
             multiParentAdapter?.setSelIds(configuration.multiParentIds)
             if (configuration.isHadChildren) {

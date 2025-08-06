@@ -1,4 +1,4 @@
-package com.qz.widget.chart.axis
+package com.qz.widget.chart.render
 
 import android.graphics.Canvas
 import com.github.mikephil.charting.components.XAxis
@@ -15,7 +15,7 @@ import com.github.mikephil.charting.utils.ViewPortHandler
  * E-mail : ezhuwx@163.com
  * Update on 13:56 by ezhuwx
  */
-class CustomPosLabelXAxis(viewPortHandler: ViewPortHandler, xAxis: XAxis, trans: Transformer) :
+class CustomPosLabelXAxisRender(viewPortHandler: ViewPortHandler, xAxis: XAxis, trans: Transformer) :
     XAxisRenderer(viewPortHandler, xAxis, trans) {
 
     /**

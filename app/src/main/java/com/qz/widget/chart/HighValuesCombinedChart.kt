@@ -8,11 +8,12 @@ import com.github.mikephil.charting.charts.CombinedChart
 import com.qz.widget.R
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.CombinedData
-import com.qz.widget.chart.axis.CustomPosLabelXAxis
+import com.qz.widget.chart.render.CustomPosLabelXAxisRender
 import com.qz.widget.chart.render.HighValuesLegendCombinedRenderer
 import com.qz.widget.chart.render.HighValuesLegendRenderer
 import me.jessyan.autosize.AutoSizeCompat
 import androidx.core.content.withStyledAttributes
+import com.qz.widget.chart.axis.MultiLineLabelsXAxis
 
 /**
  * @author : ezhuwx
@@ -23,7 +24,7 @@ import androidx.core.content.withStyledAttributes
  * version 2.0.0
  */
 class HighValuesCombinedChart : CombinedChart {
-    private lateinit var xRenter: CustomPosLabelXAxis
+    private lateinit var xRenter: CustomPosLabelXAxisRender
 
     /**
      * 是否圆角
@@ -82,7 +83,8 @@ class HighValuesCombinedChart : CombinedChart {
         mRenderer =
             HighValuesLegendCombinedRenderer(this, mAnimator, mViewPortHandler, isRoundedCorner)
         //X轴渲染
-        xRenter = CustomPosLabelXAxis(
+        mXAxis = MultiLineLabelsXAxis()
+        xRenter = CustomPosLabelXAxisRender(
             viewPortHandler,
             xAxis,
             getTransformer(YAxis.AxisDependency.LEFT)

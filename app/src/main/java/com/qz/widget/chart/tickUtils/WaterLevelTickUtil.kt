@@ -95,7 +95,7 @@ class WaterLevelTickUtil {
          */
         private fun generateTicks(hMin: Float, hMax: Float, interval: Float): List<Float> {
             val count = calculateTickCount(hMin, hMax, interval)
-            return List(count) { i -> hMin + i * interval }
+            return List(count + 1) { i -> hMin + i * interval }
         }
 
         /**

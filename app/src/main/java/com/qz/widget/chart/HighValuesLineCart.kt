@@ -7,7 +7,8 @@ import android.util.AttributeSet
 import com.qz.widget.R
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.YAxis
-import com.qz.widget.chart.axis.CustomPosLabelXAxis
+import com.qz.widget.chart.axis.MultiLineLabelsXAxis
+import com.qz.widget.chart.render.CustomPosLabelXAxisRender
 import com.qz.widget.chart.render.HighValuesLegendRenderer
 import me.jessyan.autosize.AutoSizeCompat
 
@@ -21,7 +22,7 @@ import me.jessyan.autosize.AutoSizeCompat
  */
 class HighValuesLineCart : LineChart {
 
-    private lateinit var xRenter: CustomPosLabelXAxis
+    private lateinit var xRenter: CustomPosLabelXAxisRender
 
     constructor(context: Context) : super(context) {
         initRenderSet(context)
@@ -45,7 +46,8 @@ class HighValuesLineCart : LineChart {
         //高亮渲染
         mRenderer = HighValuesLegendRenderer(this, mAnimator, mViewPortHandler)
         //X轴渲染   //X轴渲染
-        xRenter = CustomPosLabelXAxis(
+        mXAxis = MultiLineLabelsXAxis()
+        xRenter = CustomPosLabelXAxisRender(
             viewPortHandler,
             xAxis,
             getTransformer(YAxis.AxisDependency.LEFT)

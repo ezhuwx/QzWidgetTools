@@ -30,7 +30,7 @@ class MultiLineLabelsXAxis : XAxis() {
             //副标签
             val subLabel = if (valueFormatter is ColorByValueFormatter) {
                 (valueFormatter as ColorByValueFormatter).getSubXLabelValue(mEntries[index])
-            } else null
+            } else label?.split("\n")?.getOrNull(1)
             //返回相对较长文本
             if ((label?.length ?: 0) > (subLabel?.length ?: 0)) label else subLabel
         }

@@ -3,8 +3,11 @@ package com.qz.widget.chart
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.qz.widget.R
-import com.qz.widget.chart.render.HorizontalBarMultiColorValueRender
+import com.qz.widget.chart.axis.MultiLineLabelsXAxis
+import com.qz.widget.chart.render.HorizontalMultiColorBarValueRender
+import com.qz.widget.chart.render.HorizontalMultiColorBarXAxisRender
 
 /**
  * @author : ezhuwx
@@ -13,7 +16,7 @@ import com.qz.widget.chart.render.HorizontalBarMultiColorValueRender
  * E-mail : ezhuwx@163.com
  * Update on 15:47 by ezhuwx
  */
-class HorizontalMultiColorBarChart : XAxisSetHorizontalBarChart {
+class HorizontalMultiColorBarChart : HorizontalBarChart {
     constructor(context: Context) : super(context) {
         initRenderSet(context)
     }
@@ -33,21 +36,23 @@ class HorizontalMultiColorBarChart : XAxisSetHorizontalBarChart {
     private fun initRenderSet(context: Context) {
         setNoDataText(context.getString(R.string.empty_data))
         setNoDataTextColor(Color.BLACK)
+        mXAxis = MultiLineLabelsXAxis()
+        mXAxisRenderer = HorizontalMultiColorBarXAxisRender(this)
         //高亮渲染
-        mRenderer = HorizontalBarMultiColorValueRender(this, mAnimator, mViewPortHandler)
+        mRenderer = HorizontalMultiColorBarValueRender(this, mAnimator, mViewPortHandler)
     }
 
     /**
      * 颜色列表
      */
     fun setMultiColors(colors: List<Int>) {
-        (mRenderer as HorizontalBarMultiColorValueRender).multiColors = colors
+        (mRenderer as HorizontalMultiColorBarValueRender).multiColors = colors
     }
 
     /**
      * 颜色分隔符
      */
     fun setColorSplit(split: String) {
-        (mRenderer as HorizontalBarMultiColorValueRender).split = split
+        (mRenderer as HorizontalMultiColorBarValueRender).split = split
     }
 }
