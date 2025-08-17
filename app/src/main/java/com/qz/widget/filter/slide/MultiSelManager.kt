@@ -3,6 +3,7 @@ package com.qz.widget.filter.slide;
 import android.view.View;
 import android.widget.CheckBox
 import android.widget.TextView
+import androidx.annotation.IntRange
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -75,6 +76,14 @@ class MultiSelManager(
         parentRv.layoutManager = LinearLayoutManager(filterInstance.requireContext())
         multiParentAdapter = MultiSelAdapter()
         parentRv.adapter = multiParentAdapter
+        //是否可空
+        multiParentAdapter?.setCanEmpty(configuration.isCanEmpty)
+        //最大可选数
+        multiParentAdapter?.setMaxSelCount(configuration.maxSelCount)
+        //选中
+        multiParentAdapter?.setOnSelChangeListener { values, checked, _ ->
+            onMultiParentCheckedChange(values, checked)
+        }
         //父级ID
         configuration.multiParentIds = configuration.multiParentIds ?: HashSet()
         multiParentAdapter?.setSelIds(configuration.multiParentIds)
@@ -82,12 +91,6 @@ class MultiSelManager(
         configuration.multiChildPartSelParentIds =
             configuration.multiChildPartSelParentIds ?: HashSet()
         multiParentAdapter?.setMultiPartChildSelIds(configuration.multiChildPartSelParentIds)
-        //是否可空
-        multiParentAdapter?.setCanEmpty(configuration.isCanEmpty)
-        //选中
-        multiParentAdapter?.setOnSelChangeListener { values, checked, _ ->
-            onMultiParentCheckedChange(values, checked)
-        }
         //多级子列表
         if (configuration.isHadChildren) onMultiSelChildInit()
         //本地数据配置
@@ -335,11 +338,13 @@ class MultiSelManager(
     fun init(
         defaultId: String? = null,
         isCanEmpty: Boolean = true,
+        @IntRange(1) maxSelCount: Int? = null,
         onMultiSelListener: OnMultiSelFinishedListener
     ): MultiSelManager {
         configuration.isMultiSelect = true
         configuration.isHadChildren = false
         configuration.isCanEmpty = isCanEmpty
+        configuration.maxSelCount = maxSelCount
         if (!defaultId.isNullOrEmpty()) {
             configuration.multiParentIds = defaultId.split(",").toHashSet()
         }
@@ -357,6 +362,7 @@ class MultiSelManager(
         childIds: HashSet<String?>,
         partSelParentIds: HashSet<String?>,
         isCanEmpty: Boolean = true,
+        @IntRange(1) maxSelCount: Int? = null,
         onMultiSelListener: OnMultiLevelMultiSelListener
     ): MultiSelManager {
         configuration.isHadChildren = true
@@ -364,6 +370,7 @@ class MultiSelManager(
         configuration.topOptionId = topOptionId
         configuration.topOptionName = topOptionName
         configuration.isCanEmpty = isCanEmpty
+        configuration.maxSelCount = maxSelCount
         if (parentIds.contains(topOptionId)) {
             configuration.selIdResult = topOptionId
         } else {

@@ -27,6 +27,12 @@ class FilterConfiguration {
     var isCanEmpty = false
 
     /**
+     * 多选模式下最大选中数量
+     */
+    var maxSelCount: Int? = null
+
+
+    /**
      * 是否是本地数据模式
      */
     var isLocalData = false
@@ -61,10 +67,12 @@ class FilterConfiguration {
      * 默认ID
      */
     var defaultId: String? = null
+
     /**
      * 默认ID
      */
     var defaultParentId: String? = null
+
     /**
      * 选中名称
      */

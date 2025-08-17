@@ -14,14 +14,25 @@ import com.qz.widget.R
 class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
     R.layout.item_multi_sel_list
 ) {
+    var onShowChildListener: OnShowChildListener? = null
+    private var onSelChangeListener: OnSelChangeListener? = null
     private var parentId: String? = null
     private var selIds = HashSet<String?>()
     private var multiPartChildSelIds: HashSet<String?>? = null
-    private var isCanEmpty = false
     private var selPos = -1
-    var onShowChildListener: OnShowChildListener? = null
-    private var onSelChangeListener: OnSelChangeListener? = null
 
+    /**
+     * 多选模式下是否可以全不选中
+     */
+    private var isCanEmpty = false
+
+    /**
+     * 多选模式下最大选中数量
+     */
+    private var maxSelCount: Int? = null
+
+
+    @SuppressLint("NotifyDataSetChanged")
     override fun convert(holder: BaseViewHolder, item: FilterData) {
         //参数名称
         val itemTv =
@@ -29,6 +40,15 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
                 text = item.filterDataLabel
             }
         val itemCb = holder.getView<androidx.appcompat.widget.AppCompatCheckBox>(R.id.item_cb)
+        //是否启用
+        if (maxSelCount != null) {
+            //是否达到了最大数量
+            val isUnSelMax = selIds.size < maxSelCount!!
+            //是否是已选中选项
+            val isSelected = selIds.contains(item.filterDataId)
+            itemCb.isEnabled = isSelected || isUnSelMax
+            itemTv.isEnabled = isSelected || isUnSelMax
+        }
         //背景
         val contentLy = holder.itemView.apply {
             setBackgroundColor(if (holder.layoutPosition == selPos) Color.WHITE else Color.TRANSPARENT)
@@ -53,9 +73,14 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
         //选中
         itemCb.setOnClickListener {
             val isChecked = !selIds.contains(item.filterDataId)
-            if (isChecked) selIds.add(item.filterDataId)
-            else if (selIds.size > (if (isCanEmpty) 0 else 1)) selIds.remove(item.filterDataId)
-            notifyItemChanged(holder.layoutPosition)
+            if (isChecked) {
+                selIds.add(item.filterDataId)
+            } else if (selIds.size > (if (isCanEmpty) 0 else 1)) {
+                selIds.remove(item.filterDataId)
+            }
+            //通知刷新
+            if (maxSelCount != null) notifyDataSetChanged()
+            else notifyItemChanged(holder.layoutPosition)
             onSelChangeListener?.onSelChange(item.filterDataId, isChecked, parentId)
         }
         //名称点击
@@ -99,6 +124,10 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
 
     fun setCanEmpty(canEmpty: Boolean) {
         isCanEmpty = canEmpty
+    }
+
+    fun setMaxSelCount(maxSelCount: Int?) {
+        this.maxSelCount = maxSelCount
     }
 
     fun getParentId(): String? {
