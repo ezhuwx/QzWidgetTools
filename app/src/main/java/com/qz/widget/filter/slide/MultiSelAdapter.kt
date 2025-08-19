@@ -1,7 +1,10 @@
 package com.qz.widget.filter.slide
 
+import android.R.attr.data
 import android.annotation.SuppressLint
 import android.graphics.Color
+import androidx.appcompat.widget.AppCompatCheckBox
+import androidx.appcompat.widget.AppCompatTextView
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 import com.qz.widget.R
@@ -36,18 +39,26 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
     override fun convert(holder: BaseViewHolder, item: FilterData) {
         //参数名称
         val itemTv =
-            holder.getView<androidx.appcompat.widget.AppCompatTextView>(R.id.item_tv).apply {
+            holder.getView<AppCompatTextView>(R.id.item_tv).apply {
                 text = item.filterDataLabel
             }
-        val itemCb = holder.getView<androidx.appcompat.widget.AppCompatCheckBox>(R.id.item_cb)
+        val itemCb = holder.getView<AppCompatCheckBox>(R.id.item_cb)
         //是否启用
-        if (maxSelCount != null) {
-            //是否达到了最大数量
-            val isUnSelMax = selIds.size < maxSelCount!!
+        if (maxSelCount != null || !isCanEmpty) {
+            //是否达到最大数量
+            val isSelMax = selIds.size >= (maxSelCount ?: Int.MAX_VALUE)
+            //是否达到最小数量
+            val isSelMin = !isCanEmpty && selIds.size <= 1
             //是否是已选中选项
             val isSelected = selIds.contains(item.filterDataId)
-            itemCb.isEnabled = isSelected || isUnSelMax
-            itemTv.isEnabled = isSelected || isUnSelMax
+            //是否启用
+            val isEnable = when {
+                isSelected -> if (isSelMax) true else !isSelMin
+                else -> !isSelMax
+            }
+            itemCb.isEnabled = isEnable
+            itemTv.isEnabled = isEnable
+            itemTv.alpha = if (isEnable) 1.0f else 0.5f
         }
         //背景
         val contentLy = holder.itemView.apply {
@@ -75,11 +86,11 @@ class MultiSelAdapter : BaseQuickAdapter<FilterData, BaseViewHolder>(
             val isChecked = !selIds.contains(item.filterDataId)
             if (isChecked) {
                 selIds.add(item.filterDataId)
-            } else if (selIds.size > (if (isCanEmpty) 0 else 1)) {
+            } else {
                 selIds.remove(item.filterDataId)
             }
             //通知刷新
-            if (maxSelCount != null) notifyDataSetChanged()
+            if (maxSelCount != null || !isCanEmpty) notifyDataSetChanged()
             else notifyItemChanged(holder.layoutPosition)
             onSelChangeListener?.onSelChange(item.filterDataId, isChecked, parentId)
         }
