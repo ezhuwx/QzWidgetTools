@@ -11,13 +11,12 @@ import com.qz.widget.chart.formatter.ColorByValueFormatter
  * Update on 13:56 by ezhuwx
  */
 class MultiLineLabelsXAxis : XAxis() {
-    var fixedLabelCount: Int = 0
 
     override fun getLongestLabel(): String? {
-        var longest: String? = null
+        var longest = ""
         for (i in mEntries.indices) {
             val text = getFormattedLabel(i)
-            if (text != null && (longest?.length ?: 0) < text.length) longest = text
+            if (text != null && longest.length < text.length) longest = text
         }
         return longest
     }
