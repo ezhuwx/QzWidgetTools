@@ -316,6 +316,8 @@ class EditBorderLayout(
         else initTextView()
         //初始化文字内容
         if (!textStr.isNullOrEmpty()) onTextChange()
+        //可选文本配置
+        (if (isEditable) editView else textView)?.setTextIsSelectable(selectable)
         //状态配置
         onBuildContentEnabled(isEnabled)
     }
@@ -578,8 +580,8 @@ class EditBorderLayout(
             onTextChanged?.invoke(textStr)
         }
         //上移动画
-        if (!textStr.isNullOrEmpty()) (if (isEditable) editView else textView)?.post {
-            onHintTranslation(true)
+        (if (isEditable) editView else textView)?.post {
+            onHintTranslation(!textStr.isNullOrEmpty())
         }
         //重绘边框
         buildBorder()
@@ -613,10 +615,7 @@ class EditBorderLayout(
      */
     private fun onBuildContentEnabled(isEnabled: Boolean) {
         super.setEnabled(isEnabled)
-        (if (isEditable) editView else textView)?.apply {
-            this.isEnabled = isEnabled
-            setTextIsSelectable(selectable && !isEnabled)
-        }
+        (if (isEditable) editView else textView)?.isEnabled = isEnabled
         borderPaint.color = if (isEnabled) boxStrokeColor else "#E3E3E3".toColorInt()
         //选择尾标
         if (!isEditable) textView?.run {
