@@ -21,6 +21,8 @@ class LinkRecyclerViewManager {
     private var mFirstOffset = -1
     private var mFirstPos = -1
     private var handleScrollView: RecyclerView? = null
+    private var isSyncing = false
+    private val scrollStates = HashMap<RecyclerView, Int>()
 
     @JvmField
     var helper: LinkRecyclerViewHelper
@@ -83,6 +85,7 @@ class LinkRecyclerViewManager {
      */
     fun removeRecyclerView(recyclerView: RecyclerView) {
         observerList.remove(recyclerView)
+        scrollStates.remove(recyclerView)
         recyclerView.setOnTouchListener(null)
         recyclerView.clearOnScrollListeners()
     }
@@ -92,54 +95,97 @@ class LinkRecyclerViewManager {
      */
     fun clear() {
         observerList.clear()
+        scrollStates.clear()
     }
 
     inner class OnTouchListener : View.OnTouchListener {
         override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
-            val action = motionEvent.action
-            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_POINTER_DOWN) {
-                //触摸停止
-                for (recyclerView in observerList) {
-                    if (recyclerView != view) recyclerView.stopScroll()
+            val action = motionEvent.actionMasked
+            when (action) {
+                MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                    //设置当前RecyclerView
+                    handleScrollView = view as RecyclerView
+                    //停止滚动的RecyclerView
+                    stopOtherScrollingRecyclerViews(view)
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+                    //触摸结束
+                    handleScrollView = null
                 }
             }
             return false
+        }
+
+        private fun stopOtherScrollingRecyclerViews(currentView: RecyclerView) {
+            observerList.forEach { recyclerView ->
+                if (recyclerView != currentView) {
+                    //停止正在滚动的RecyclerView
+                    val scrollState = scrollStates[recyclerView] ?: RecyclerView.SCROLL_STATE_IDLE
+                    if (scrollState != RecyclerView.SCROLL_STATE_IDLE) {
+                        recyclerView.stopScroll()
+                    }
+                }
+            }
         }
     }
 
     inner class ScrollListener : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            //手动触发滚动的View
-            handleScrollView = recyclerView
-            //layoutManager
+            //防止循环调用
+            if (isSyncing) return
             val layoutManager = recyclerView.layoutManager
             if (layoutManager is LinearLayoutManager) {
                 //首个可见子项位置,右侧边距离
                 val (firstVisiblePosition, decoratedRight) = onGetScrollParams(recyclerView)
-                //记录滚动位置及边距
+                //更新全局位置信息
                 mFirstPos = firstVisiblePosition
                 mFirstOffset = decoratedRight
-                //循环关联项
-                observerList.filter { recyclerView !== it && !it.isInLayout }
-                    .forEach { next ->
-                        val nextLayoutManager = next.layoutManager
-                        if (nextLayoutManager is LinearLayoutManager) {
-                            //滚动到指定位置
+                //设置同步标志
+                isSyncing = true
+                try {
+                    //同步滚动到其他RecyclerView
+                    syncOtherRecyclerViews(recyclerView, firstVisiblePosition, decoratedRight)
+                } finally {
+                    //清除同步标志
+                    isSyncing = false
+                }
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            //记录滚动状态
+            scrollStates[recyclerView] = newState
+        }
+
+        private fun syncOtherRecyclerViews(
+            sourceRecyclerView: RecyclerView,
+            firstVisiblePosition: Int,
+            decoratedRight: Int
+        ) {
+            //遍历同步
+            observerList.forEach { next ->
+                //确保不是源RecyclerView且不在布局中
+                if (next !== sourceRecyclerView && !next.isInLayout) {
+                    val nextLayoutManager = next.layoutManager
+                    if (nextLayoutManager is LinearLayoutManager) {
+                        //获取目标RecyclerView当前位置
+                        val (nextFirstVisiblePosition, nextDecoratedRight) = onGetScrollParams(next)
+                        //同步
+                        if (nextFirstVisiblePosition != firstVisiblePosition ||
+                            nextDecoratedRight != decoratedRight
+                        ) {
+                            //同步滚动
                             nextLayoutManager.scrollToPositionWithOffset(
                                 firstVisiblePosition + 1, decoratedRight
                             )
                         }
                     }
+                }
             }
-            if (observerList.all {
-                    //首个可见子项位置,右侧边距离
-                    val (firstVisiblePosition, decoratedRight) = onGetScrollParams(it)
-                    //滚动是否已同步
-                    firstVisiblePosition == mFirstPos && mFirstOffset == decoratedRight
-                }) handleScrollView = null
         }
     }
-
 
     /**
      * 获取当前滚动参数
@@ -148,9 +194,8 @@ class LinkRecyclerViewManager {
         val layoutManager = recyclerView.layoutManager as LinearLayoutManager
         //首个可见子项位置
         val firstVisiblePosition = layoutManager.findFirstVisibleItemPosition()
-        //右侧边距离
-        val decoratedRight =
-            layoutManager.getChildAt(0)?.let { layoutManager.getDecoratedRight(it) } ?: 0
+        val firstView = layoutManager.getChildAt(0)
+        val decoratedRight = firstView?.let { layoutManager.getDecoratedRight(it) } ?: 0
         return Pair(firstVisiblePosition, decoratedRight)
     }
 }

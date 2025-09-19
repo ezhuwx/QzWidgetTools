@@ -1,14 +1,20 @@
 package com.qz.widget.linkRecyclerView
 
 import android.graphics.Color
+import android.graphics.Typeface
+import android.text.SpannableStringBuilder
 import android.view.View
 import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.view.isVisible
 import com.chad.library.adapter.base.BaseQuickAdapter
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
+import com.google.android.material.resources.TextAppearance
 import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
+import java.lang.reflect.Type
+import java.time.format.TextStyle
+import androidx.core.graphics.toColorInt
 
 /**
  * @author : ezhuwx
@@ -17,31 +23,68 @@ import me.jessyan.autosize.utils.AutoSizeUtils
  * E-mail : ezhuwx@163.com
  * Update on 16:40 by ezhuwx
  */
-class LinkViewOptionAdapter() :
+open class LinkViewOptionAdapter() :
     BaseQuickAdapter<LinkViewOption, LinkViewOptionAdapter.ViewHolder>(R.layout.item_view_option) {
+
+    /**
+     * 行文字颜色
+     */
     @ColorInt
-    var lineTextColor: Int? = null
-    var lineTextSize: Float? = null
-    var horizontalPadding = 10f
-    var verticalPadding = 5f
-    var onLinkOptionClickListener: OnLinkOptionClickListener? = null
+    var lineTextColor: Int = Color.BLACK
+
+    /**
+     * 行文字大小
+     */
+    var lineTextSize: Float = 14f
+
+    /**
+     * 行文字样式
+     */
+    var lineTextStyle = Typeface.NORMAL
+
+    /**
+     * 列分割线颜色
+     */
     var gridLineColor: Int? = null
+
+    /**
+     * 列分割线间距
+     */
+    var horizontalPadding = 10f
+
+    /**
+     * 行分割线间距
+     */
+    var verticalPadding = 5f
+
+    /**
+     * 行点击监听
+     */
+    var onLinkOptionClickListener: OnLinkOptionClickListener? = null
     override fun convert(holder: ViewHolder, item: LinkViewOption) {
+        item.textSize = item.textSize ?: lineTextSize
         //值
         holder.valueTv.run {
-            text = item.value
-            textSize = lineTextSize ?: item.textSize
-            setTextColor(lineTextColor ?: item.textColor)
+            typeface = Typeface.defaultFromStyle(lineTextStyle)
+            setTextColor(item.textColor ?: lineTextColor)
+            textSize = item.textSize ?: lineTextSize
+            text = item.spanValue ?: item.value
             //宽高度
             layoutParams.width = AutoSizeUtils.dp2px(context, item.width.toFloat())
             //边距
             val horizontalPadding = AutoSizeUtils.dp2px(context, horizontalPadding)
             val verticalPadding = AutoSizeUtils.dp2px(context, verticalPadding)
             setPadding(horizontalPadding, verticalPadding, horizontalPadding, verticalPadding)
+            //图标
+            setCompoundDrawablesWithIntrinsicBounds(
+                item.drawableStart , null,
+                item.drawableEnd , null
+            )
+            compoundDrawablePadding = AutoSizeUtils.dp2px(context, item.drawablePadding ?: 0f)
         }
         //分割线
         holder.valueV.isVisible = holder.layoutPosition != itemCount - 1
-        holder.valueV.setBackgroundColor(gridLineColor ?: Color.parseColor("#cccccc"))
+        holder.valueV.setBackgroundColor(gridLineColor ?: "#cccccc".toColorInt())
         //点击
         holder.valueTv.setOnClickListener {
             onLinkOptionClickListener?.onLinkOptionClick(item, holder.layoutPosition)

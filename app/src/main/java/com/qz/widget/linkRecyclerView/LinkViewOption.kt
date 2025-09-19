@@ -1,7 +1,10 @@
 package com.qz.widget.linkRecyclerView
 
 import android.graphics.Color
+import android.graphics.drawable.Drawable
+import android.text.SpannableStringBuilder
 import androidx.annotation.ColorInt
+import androidx.annotation.DrawableRes
 
 /**
  * @author : ezhuwx
@@ -17,11 +20,37 @@ class LinkViewOption {
         private set
     var width = 0
         private set
-    var textSize = 14f
-        private set
 
+    /**
+     * 文字大小
+     */
+    var textSize: Float? = null
+
+    /**
+     * 文字颜色
+     */
     @ColorInt
-    var textColor = Color.BLACK
+    var textColor: Int? = null
+
+    /**
+     * 富文本
+     */
+    var spanValue: SpannableStringBuilder? = null
+
+    /**
+     * 起始图标
+     */
+    var drawableStart: Drawable? = null
+
+    /**
+     * 结束图标
+     */
+    var drawableEnd: Drawable? = null
+
+    /**
+     * 图标间距
+     */
+    var drawablePadding: Float? = null
 
     constructor(value: String, width: Int, typeName: String, textSize: Float) {
         this.value = value

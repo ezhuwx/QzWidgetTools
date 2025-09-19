@@ -1,6 +1,9 @@
 package com.qz.widget.linkRecyclerView
 
+import android.R.attr.width
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.text.SpannableStringBuilder
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -36,11 +39,14 @@ class LinkRecyclerViewHelper {
             maxHeight = maxHeight.coerceAtLeast(
                 onMeasureHeight(
                     context,
-                    item.value,
+                    item.spanValue ?: SpannableStringBuilder(item.value),
                     item.width,
                     item.textSize,
                     horizontalPadding.toInt(),
                     verticalPadding.toInt(),
+                    item.drawablePadding,
+                    item.drawableStart,
+                    item.drawableEnd
                 )
             )
         }
@@ -52,12 +58,19 @@ class LinkRecyclerViewHelper {
      */
     fun onMeasureHeight(
         context: Context?,
-        content: String,
+        content: SpannableStringBuilder,
         width: Int,
         textSize: Float,
-        padding: Int
+        padding: Int,
+        drawablePadding: Float?,
+        drawableStart: Drawable?,
+        drawableEnd: Drawable?
     ): Int {
-        return onMeasureHeight(context, content, width, textSize, padding, padding)
+        return onMeasureHeight(
+            context, content, width, textSize,
+            padding, padding,
+            drawablePadding, drawableStart, drawableEnd
+        )
     }
 
     /**
@@ -65,15 +78,20 @@ class LinkRecyclerViewHelper {
      */
     private fun onMeasureHeight(
         context: Context?,
-        content: String,
+        content: SpannableStringBuilder,
         width: Int,
-        textSize: Float,
+        textSize: Float?,
         horizontalPadding: Int,
-        verticalPadding: Int
+        verticalPadding: Int,
+        drawablePadding: Float?,
+        drawableStart: Drawable?,
+        drawableEnd: Drawable?
     ): Int {
         return onMeasureHeight(
             context, content, width, textSize,
-            horizontalPadding, verticalPadding, horizontalPadding, verticalPadding
+            horizontalPadding, verticalPadding,
+            horizontalPadding, verticalPadding,
+            drawablePadding, drawableStart, drawableEnd
         )
     }
 
@@ -81,27 +99,44 @@ class LinkRecyclerViewHelper {
      * 测量文本高度
      */
     private fun onMeasureHeight(
-        context: Context?, content: String?, width: Int, textSize: Float, leftPadding: Int = 0,
-        topPadding: Int = 0, rightPadding: Int = 0, bottomPadding: Int = 0
+        context: Context?,
+        content: SpannableStringBuilder?,
+        width: Int,
+        textSize: Float?,
+        leftPadding: Int = 0,
+        topPadding: Int = 0,
+        rightPadding: Int = 0,
+        bottomPadding: Int = 0,
+        drawablePadding: Float?,
+        drawableStart: Drawable?,
+        drawableEnd: Drawable?
     ): Int {
         val newWidth = AutoSizeUtils.dp2px(
             context, width.toFloat() - leftPadding.toFloat() - rightPadding.toFloat()
         )
         //配置
-        if (measureView == null) {
-            measureView = TextView(context)
+        measureView = measureView ?: TextView(context)
+        with(measureView!!) {
+            //设置图标
+            setCompoundDrawablesWithIntrinsicBounds(
+                drawableStart, null, drawableEnd, null
+            )
+            //设置图标间距
+            compoundDrawablePadding = AutoSizeUtils.dp2px(context, drawablePadding ?: 0f)
+            //设置文本
+            text = content
+            //设置文本大小
+            this@with.textSize = textSize ?: 14f
+            //设置宽高
+            layoutParams = ViewGroup.LayoutParams(newWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
+            //测量高度
+            val w = View.MeasureSpec.makeMeasureSpec(newWidth, View.MeasureSpec.EXACTLY)
+            //测量宽度
+            val h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            measure(w, h)
+            return (measuredHeight + AutoSizeUtils.dp2px(context, bottomPadding.toFloat() + 1f)
+                    + AutoSizeUtils.dp2px(context, topPadding.toFloat() + 1f))
         }
-        measureView!!.text = content
-        measureView!!.layoutParams =
-            ViewGroup.LayoutParams(newWidth, ViewGroup.LayoutParams.WRAP_CONTENT)
-        measureView!!.textSize = textSize
-        //测量
-        val w = View.MeasureSpec.makeMeasureSpec(newWidth, View.MeasureSpec.EXACTLY)
-        val h = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
-        measureView!!.measure(w, h)
-        return (measureView!!.measuredHeight
-                + AutoSizeUtils.dp2px(context, bottomPadding.toFloat())
-                + AutoSizeUtils.dp2px(context, topPadding.toFloat()))
     }
 
     fun setMiniHeight(context: Context?, miniHeight: Float) {
