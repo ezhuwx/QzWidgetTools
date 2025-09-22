@@ -1,6 +1,7 @@
 package com.qz.widget.linkRecyclerView
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +23,8 @@ class LinkRecyclerViewManager {
     private var mFirstPos = -1
     private var handleScrollView: RecyclerView? = null
     private var isSyncing = false
-    private val scrollStates = HashMap<RecyclerView, Int>()
+    // 添加滚动状态跟踪
+    private var scrollState = RecyclerView.SCROLL_STATE_IDLE
 
     @JvmField
     var helper: LinkRecyclerViewHelper
@@ -51,6 +53,7 @@ class LinkRecyclerViewManager {
             recyclerView.setOnTouchListener(touchListener)
             recyclerView.clearOnScrollListeners()
             recyclerView.addOnScrollListener(scrollListener)
+            recyclerView.overScrollMode = View.OVER_SCROLL_NEVER
         }
     }
 
@@ -85,7 +88,6 @@ class LinkRecyclerViewManager {
      */
     fun removeRecyclerView(recyclerView: RecyclerView) {
         observerList.remove(recyclerView)
-        scrollStates.remove(recyclerView)
         recyclerView.setOnTouchListener(null)
         recyclerView.clearOnScrollListeners()
     }
@@ -95,23 +97,26 @@ class LinkRecyclerViewManager {
      */
     fun clear() {
         observerList.clear()
-        scrollStates.clear()
     }
 
     inner class OnTouchListener : View.OnTouchListener {
+
         override fun onTouch(view: View, motionEvent: MotionEvent): Boolean {
             val action = motionEvent.actionMasked
             when (action) {
                 MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
-                    //设置当前RecyclerView
-                    handleScrollView = view as RecyclerView
-                    //停止滚动的RecyclerView
-                    stopOtherScrollingRecyclerViews(view)
-                }
+                    val currentRecyclerView = view as RecyclerView
+                    Log.d("LinkRecyclerView", "ACTION_DOWN：$action")
 
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
-                    //触摸结束
-                    handleScrollView = null
+                    // 如果当前有其他RecyclerView正在惯性滚动，先停止它
+                    val scrollingRecyclerView = getScrollingRecyclerView()
+                    if (scrollingRecyclerView != null && scrollingRecyclerView != currentRecyclerView) {
+                        scrollingRecyclerView.stopScroll()
+                    }
+
+                    //停止其他RecyclerView的滚动
+                    stopOtherScrollingRecyclerViews(currentRecyclerView)
+                    currentRecyclerView.stopScroll()
                 }
             }
             return false
@@ -121,11 +126,16 @@ class LinkRecyclerViewManager {
             observerList.forEach { recyclerView ->
                 if (recyclerView != currentView) {
                     //停止正在滚动的RecyclerView
-                    val scrollState = scrollStates[recyclerView] ?: RecyclerView.SCROLL_STATE_IDLE
-                    if (scrollState != RecyclerView.SCROLL_STATE_IDLE) {
-                        recyclerView.stopScroll()
-                    }
+                    recyclerView.stopScroll()
                 }
+            }
+        }
+
+        private fun getScrollingRecyclerView(): RecyclerView? {
+            return observerList.find { recyclerView ->
+                val state = recyclerView.scrollState
+                state == RecyclerView.SCROLL_STATE_SETTLING ||
+                        state == RecyclerView.SCROLL_STATE_DRAGGING
             }
         }
     }
@@ -134,6 +144,12 @@ class LinkRecyclerViewManager {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             //防止循环调用
             if (isSyncing) return
+
+            // 如果当前有处理源且不是当前RecyclerView，则不处理
+            if (handleScrollView != null && handleScrollView != recyclerView) {
+                return
+            }
+
             val layoutManager = recyclerView.layoutManager
             if (layoutManager is LinearLayoutManager) {
                 //首个可见子项位置,右侧边距离
@@ -143,6 +159,10 @@ class LinkRecyclerViewManager {
                 mFirstOffset = decoratedRight
                 //设置同步标志
                 isSyncing = true
+                //设置源RecyclerView（如果是用户主动操作）
+                if (handleScrollView == null) {
+                    handleScrollView = recyclerView
+                }
                 try {
                     //同步滚动到其他RecyclerView
                     syncOtherRecyclerViews(recyclerView, firstVisiblePosition, decoratedRight)
@@ -151,12 +171,6 @@ class LinkRecyclerViewManager {
                     isSyncing = false
                 }
             }
-        }
-
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            super.onScrollStateChanged(recyclerView, newState)
-            //记录滚动状态
-            scrollStates[recyclerView] = newState
         }
 
         private fun syncOtherRecyclerViews(
@@ -181,6 +195,32 @@ class LinkRecyclerViewManager {
                                 firstVisiblePosition + 1, decoratedRight
                             )
                         }
+                    }
+                }
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            scrollState = newState
+
+            when (newState) {
+                RecyclerView.SCROLL_STATE_IDLE -> {
+                    // 滚动完全停止时清除处理源
+                    if (handleScrollView == recyclerView) {
+                        handleScrollView = null
+                    }
+                }
+
+                RecyclerView.SCROLL_STATE_DRAGGING -> {
+                    // 用户开始拖拽时设置处理源
+                    handleScrollView = recyclerView
+                }
+
+                RecyclerView.SCROLL_STATE_SETTLING -> {
+                    // 惯性滚动时保持处理源
+                    if (handleScrollView == null) {
+                        handleScrollView = recyclerView
                     }
                 }
             }
