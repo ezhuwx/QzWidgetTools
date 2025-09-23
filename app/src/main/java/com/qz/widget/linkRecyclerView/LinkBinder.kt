@@ -1,6 +1,5 @@
 package com.qz.widget.linkRecyclerView
 
-import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import com.chad.library.adapter.base.viewholder.BaseViewHolder
 
@@ -123,6 +122,10 @@ interface LinkBinder<T, VH : BaseViewHolder?, H : LinkHeaderView?> {
 
     fun setOnLinkItemClickListener(onLinkItemClickListener: LinkBinderAdapter.OnLinkItemClickListener<T>?) {
         linkAdapter.setOnLinkItemClickListener(onLinkItemClickListener)
+    }
+
+    fun setScrollingListener(onScrollingListener: LinkRecyclerViewManager.OnScrollingListener) {
+        linkAdapter.setScrollingListener(onScrollingListener)
     }
 
     fun setFooterHsv(footerHsv: RecyclerView) {

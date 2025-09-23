@@ -40,7 +40,11 @@ class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
     @ColorInt
     var gridLineColor: Int? = null
 
+    /**
+     * 点击事件
+     */
     private var onLinkItemClickListener: OnLinkItemClickListener<T>? = null
+
 
     init {
         initHeader(headerHsv.context)
@@ -101,8 +105,6 @@ class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
         initFooter(context)
         //数据配置
         adapter?.setNewInstance(dataList)
-        //初始化联动
-        linkManager.initRecyclerView(linkRv)
     }
 
     /**
@@ -180,6 +182,10 @@ class LinkBinderAdapter<T, VH : BaseViewHolder?, H : LinkHeaderView?>(
 
     fun setOnLinkItemClickListener(onLinkItemClickListener: OnLinkItemClickListener<T>?) {
         this.onLinkItemClickListener = onLinkItemClickListener
+    }
+
+    fun setScrollingListener(onScrollingListener: LinkRecyclerViewManager.OnScrollingListener) {
+        linkManager.onScrollingListener = onScrollingListener
     }
 
     fun setFooterHsv(footerHsv: RecyclerView) {
