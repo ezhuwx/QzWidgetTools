@@ -631,13 +631,14 @@ class EditBorderLayout(
     }
 
     fun setTextStr(text: String?) {
-        this.textStr = text
-        onTextChange()
+        if (text != getContent()) {
+            this.textStr = text
+            onTextChange()
+        }
     }
 
     fun setTextStr(@StringRes stringId: Int) {
-        this.textStr = context.resources.getString(stringId)
-        onTextChange()
+        setTextStr(context.resources.getString(stringId))
     }
 
     /**
