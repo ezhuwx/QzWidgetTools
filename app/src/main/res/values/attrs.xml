@@ -53,8 +53,6 @@
         <attr name="android:maxLength" />
         <!--焦点全选-->
         <attr name="android:selectAllOnFocus" />
-        <!--可选文本-->
-        <attr name="android:selectable" />
         <!--内容位置-->
         <attr name="android:gravity" />
     </declare-styleable>

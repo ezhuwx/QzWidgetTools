@@ -156,10 +156,6 @@ class EditBorderLayout(
      */
     private var selectAllOnFocus: Boolean = false,
     /**
-     * 可选文本
-     */
-    private var selectable: Boolean = true,
-    /**
      * 内容位置
      */
     private var gravity: Int = Gravity.CENTER,
@@ -294,10 +290,6 @@ class EditBorderLayout(
             selectAllOnFocus = getBoolean(
                 R.styleable.EditBorderLayout_android_selectAllOnFocus, selectAllOnFocus
             )
-            //可选文本
-            selectable = getBoolean(
-                R.styleable.EditBorderLayout_android_selectable, selectable
-            )
             //内容位置
             gravity = getInt(
                 R.styleable.EditBorderLayout_android_gravity, gravity
@@ -316,8 +308,6 @@ class EditBorderLayout(
         else initTextView()
         //初始化文字内容
         if (!textStr.isNullOrEmpty()) onTextChange()
-        //可选文本配置
-        (if (isEditable) editView else textView)?.setTextIsSelectable(selectable)
         //状态配置
         onBuildContentEnabled(isEnabled)
     }
@@ -340,7 +330,7 @@ class EditBorderLayout(
     /**
      * 初始化边框
      */
-    private fun buildBorder(isHasFocus: Boolean = false, isError: Boolean = false) {
+    private fun buildBorder(isError: Boolean = false) {
         if (measuredWidth != 0 && measuredHeight != 0) {
             //初始化画布
             if (cacheBitmap == null) onReSetCanvas()
@@ -367,7 +357,7 @@ class EditBorderLayout(
             borderPath.moveTo(left + boxCornerRadius, top)
             //右上角 - 圆角直径
             //提示文字是否显示在顶部
-            val isTipTextAtTop = isHasFocus || !isContentEmpty()
+            val isTipTextAtTop = isHadFocus() || !isContentEmpty()
             if (isTipTextAtTop) {
                 val tipTextWidth = (hintView?.measuredWidth ?: 0) + tipInterval * 2
                 val sideWidth = (right - left - tipTextWidth) / 2
@@ -489,7 +479,7 @@ class EditBorderLayout(
             setOnFocusChangeListener { _, hasFocus ->
                 onFocusChange(hasFocus)
                 borderPaint.color = if (hasFocus) boxStrokeFocusedColor else boxStrokeColor
-                buildBorder(hasFocus)
+                buildBorder()
             }
             addTextChangedListener(afterTextChanged = {
                 onTextChanged?.invoke(it?.toString())
@@ -580,11 +570,17 @@ class EditBorderLayout(
             onTextChanged?.invoke(textStr)
         }
         //上移动画
-        (if (isEditable) editView else textView)?.post {
-            onHintTranslation(!textStr.isNullOrEmpty())
+        (if (isEditable) editView else textView)?.let { view ->
+            view.post {
+                if (textStr.isNullOrEmpty()) view.clearFocus()
+                else {
+                    onHintTranslation(true)
+                    if (view is EditText) view.setSelection(textStr?.length ?: 0)
+                    //重绘边框
+                    buildBorder()
+                }
+            }
         }
-        //重绘边框
-        buildBorder()
     }
 
     /**
@@ -652,6 +648,13 @@ class EditBorderLayout(
     }
 
     /**
+     * 获取当前是否已获取焦点
+     */
+    private fun isHadFocus(): Boolean {
+        return (if (isEditable) editView else textView)?.isFocused == true
+    }
+
+    /**
      * 获取提示内容
      */
     fun getHintStr(): String? {
@@ -678,7 +681,7 @@ class EditBorderLayout(
      */
     fun stateError() {
         //重绘异常边框
-        buildBorder(if (isEditable) editView?.hasFocus() == true else false, true)
+        buildBorder(true)
         //抖动动画
         startAnimation(TranslateAnimation(0f, 10f, 0f, 0f).apply {
             setDuration(50)
