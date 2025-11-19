@@ -528,6 +528,7 @@ class EditBorderLayout(
         })
         //绘制边框
         cacheCanvas?.drawPath(borderPath, borderPaint)
+        postInvalidate()
     }
 
     /**
