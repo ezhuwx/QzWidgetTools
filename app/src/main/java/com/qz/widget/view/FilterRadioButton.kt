@@ -91,10 +91,16 @@ class FilterRadioButton : RadioButton {
         setTextColor(color)
         //默认大小15sp
         setTextSize(TypedValue.COMPLEX_UNIT_SP, defaultMaxTextSize)
+        //是否可用
+        val isEnabled = attrs?.getAttributeBooleanValue(
+            ANDROID_NAMESPACE, "enabled", true
+        ) == true
         //筛选图标
         setCompoundDrawablesWithIntrinsicBounds(
             null, null,
-            ResourcesCompat.getDrawable(resources, R.drawable.ic_widget_pull_down, null),
+            if (isEnabled) ResourcesCompat.getDrawable(
+                resources, R.drawable.ic_widget_pull_down, null
+            ) else null,
             null
         )
         TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(color))
@@ -106,6 +112,18 @@ class FilterRadioButton : RadioButton {
         ) ?: R.drawable.small_white_corner_bg
         //白底圆角小背景（xml可设置阴影边框）
         setBackgroundResource(background)
+    }
+
+    override fun setEnabled(enabled: Boolean) {
+        super.setEnabled(enabled)
+        //筛选图标
+        setCompoundDrawablesWithIntrinsicBounds(
+            null, null,
+            if (enabled) ResourcesCompat.getDrawable(
+                resources, R.drawable.ic_widget_pull_down, null
+            ) else null,
+            null
+        )
     }
 
     override fun setText(text: CharSequence?, type: BufferType?) {
@@ -147,16 +165,13 @@ class FilterRadioButton : RadioButton {
     private fun calculatePadding(usableSize: Float): Int {
         val drawables = compoundDrawables
         val drawableRight = drawables[2]
-        if (drawableRight != null) {
-            val paint: Paint = paint
-            paint.textSize = AutoSizeUtils.dp2px(context, usableSize).toFloat()
-            val textWidth = paint.measureText(text.toString())
-            val drawableWidth = drawableRight.intrinsicWidth
-            val bodyWidth = textWidth + drawableWidth + drawablePadding
-            val width = width.toFloat()
-            return floor(((width - bodyWidth) / 2f).toDouble()).toInt()
-        }
-        return 0
+        val paint: Paint = paint
+        paint.textSize = AutoSizeUtils.dp2px(context, usableSize).toFloat()
+        val textWidth = paint.measureText(text.toString())
+        val drawableWidth = drawableRight?.intrinsicWidth ?: 0
+        val bodyWidth = textWidth + drawableWidth + drawablePadding
+        val width = width.toFloat()
+        return floor(((width - bodyWidth) / 2f).toDouble()).toInt()
     }
 
     /**

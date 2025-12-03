@@ -1,5 +1,6 @@
 package com.qz.widget.view
 
+import android.R.attr.text
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
@@ -36,6 +37,7 @@ import kotlin.random.Random
 import androidx.core.graphics.toColorInt
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.createBitmap
+import java.lang.Integer.getInteger
 
 
 /**
@@ -162,7 +164,7 @@ class EditBorderLayout(
     /**
      * 输入监听
      */
-    private var onTextChanged: ((String?) -> Unit)? = null
+    private var onTextChanged: ((String?) -> Unit)? = null,
 ) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes) {
     private var editView: EditText? = null
     private var textView: TextView? = null
@@ -573,12 +575,16 @@ class EditBorderLayout(
         //上移动画
         (if (isEditable) editView else textView)?.let { view ->
             view.post {
-                if (textStr.isNullOrEmpty()) view.clearFocus()
-                else {
+                if (textStr.isNullOrEmpty()) {
+                    if (view.hasFocus()) view.clearFocus()
+                    else {
+                        onHintTranslation(false)
+                        buildBorder()
+                    }
+                } else {
                     onHintTranslation(true)
-                    if (view is EditText) view.setSelection(textStr?.length ?: 0)
-                    //重绘边框
                     buildBorder()
+                    if (view is EditText) view.setSelection(textStr?.length ?: 0)
                 }
             }
         }
@@ -633,13 +639,32 @@ class EditBorderLayout(
 
     fun setTextStr(text: String?) {
         if (text != getContent()) {
-            this.textStr = text
+            textStr = text
             onTextChange()
         }
     }
 
     fun setTextStr(@StringRes stringId: Int) {
         setTextStr(context.resources.getString(stringId))
+    }
+
+
+    /**
+     * 清空内容
+     */
+    fun clear() {
+        textStr = ""
+        onTextChange()
+    }
+
+    /**
+     * 强制刷新
+     */
+    fun forceRefresh(isMoveUp: Boolean? = null) {
+        onHintTranslation(isMoveUp ?: (if (isEditable) editView else textView).run {
+            hasFocus() || text.toString().isNotEmpty()
+        })
+        buildBorder()
     }
 
     /**
