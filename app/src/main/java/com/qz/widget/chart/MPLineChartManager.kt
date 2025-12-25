@@ -44,7 +44,7 @@ fun <T : BarLineData> BarLineChartBase<T>.commonInit(
     legendHorizontalAlign: Legend.LegendHorizontalAlignment = Legend.LegendHorizontalAlignment.LEFT,
     legendStyle: Legend.LegendForm = Legend.LegendForm.LINE,
     legendOrientation: Legend.LegendOrientation = Legend.LegendOrientation.HORIZONTAL,
-    legendSize: Float = 10f
+    legendSize: Float = 10f,
 ): Legend? {
     //设置描述信息
     description = Description().apply {
@@ -108,7 +108,7 @@ fun <T : BarLineData> BarLineChartBase<T>.setLegend(
     horizontalAlign: Legend.LegendHorizontalAlignment = Legend.LegendHorizontalAlignment.LEFT,
     style: Legend.LegendForm = Legend.LegendForm.LINE,
     orientation: Legend.LegendOrientation = Legend.LegendOrientation.HORIZONTAL,
-    size: Float = 10f
+    size: Float = 10f,
 ): Legend {
     return legend.apply {
         this.verticalAlignment = verticalAlign
@@ -426,7 +426,7 @@ fun <T : BarLineData> BarLineChartBase<T>.addLimit(
     xOffset: Float = 5f, yOffset: Float = 5f,
     @ColorInt textColor: Int? = null,
     limitPaddingStart: Float = 0f,
-    limitPaddingEnd: Float = 0f
+    limitPaddingEnd: Float = 0f,
 ): LimitLine {
     val limitLine = LimitStyleLine(value, label).apply {
         this.textColor = textColor ?: color
@@ -495,12 +495,12 @@ private fun formatterDate(
     newFormat: SimpleDateFormat? = null,
 ): String {
     var tmStr = tm
-    newFormat?.let {
+    if (tm.isNotEmpty() && newFormat != null) {
         try {
             //当前x轴日期
-            tmStr = format.parse(tm)?.let { newFormat.format(it) } ?: ""
-        } catch (e: ParseException) {
-            e.printStackTrace()
+            tmStr = format.parse(tm)?.let { newFormat.format(it) } ?: tmStr
+        } catch (_: ParseException) {
+
         }
     }
     return tmStr
