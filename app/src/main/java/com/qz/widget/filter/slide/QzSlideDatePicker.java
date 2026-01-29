@@ -112,6 +112,15 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      */
     private int maxYear = 2099;
 
+    /**
+     * 时间限制开始时间
+     */
+    private Long limitStart = null;
+    /**
+     * 时间限制截止时间
+     */
+    private Long limitEnd = null;
+
     @Override
     public int getLayoutRes() {
         return R.layout.fragment_common_slide_date_picker;
@@ -205,6 +214,11 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         endDate.set(Calendar.HOUR_OF_DAY, 23);
         endDate.set(Calendar.MINUTE, 59);
         endDate.set(Calendar.SECOND, 59);
+        //设置了时间限制
+        if (limitStart != null && limitEnd != null) {
+            startDate.setTimeInMillis(limitStart);
+            endDate.setTimeInMillis(limitEnd);
+        }
         //时间选择器
         return new TimePickerBuilder(requireContext(), this::onTimePicked)
                 .setType(new boolean[]{isShowYear, !isFormatWithYear, !isFormatWithYear && !isFormatWithMonth,
@@ -318,6 +332,15 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      */
     public QzSlideDatePicker setMaxYear(int maxYear) {
         this.maxYear = maxYear;
+        return this;
+    }
+
+    /**
+     * 设置最晚年份
+     */
+    public QzSlideDatePicker setLimitRange(Long limitStart, Long limitEnd) {
+        this.limitStart = limitStart;
+        this.limitEnd = limitEnd;
         return this;
     }
 
