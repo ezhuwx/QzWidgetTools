@@ -236,8 +236,8 @@ fun <T> Chart<*>.buildBarChartData(
     val data = BarData(dataSets)
     //需要显示柱状图的类别 数量
     val barAmount = dataSets.size
-    //设置组间距占比30%
-    val groupSpace = if (dataList.size <= 3) 0.6f else 0.2f
+    //设置组间距占比20%
+    val groupSpace = 0.2f
     val barSpace = 0.05f
     val barWidth = (1f - groupSpace) / barAmount - 0.05f
     //设置柱状图宽度

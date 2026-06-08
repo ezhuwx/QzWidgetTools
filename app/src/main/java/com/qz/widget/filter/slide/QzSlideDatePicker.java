@@ -9,10 +9,10 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
-import com.bigkoo.pickerview.builder.TimePickerBuilder;
-import com.bigkoo.pickerview.view.TimePickerView;
 import com.qz.widget.R;
 import com.qz.widget.alert.QzBaseSlideFragment;
+import com.qz.widget.view.datePicker.TimePickerBuilder;
+import com.qz.widget.view.datePicker.TimePickerView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,6 +66,10 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
      * 是否格式化到分
      */
     private boolean isFormatWithMinute;
+    /**
+     * 分钟间隔(默认间隔1分钟)
+     */
+    private int minuteInterval = 1;
     /**
      * 是否仅格式化到日
      */
@@ -138,10 +142,10 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
         //日期格式
         String formatStr = isFormatWithSecond ? FORMAT_SECOND
                 : isFormatWithMinute ? FORMAT_MINUTE
-                : isFormatWithDay ? FORMAT_DAY
-                : isFormatWithMonth ? FORMAT_MONTH
-                : isFormatWithYear ? FORMAT_YEAR
-                : FORMAT_HOUR;
+                  : isFormatWithDay ? FORMAT_DAY
+                    : isFormatWithMonth ? FORMAT_MONTH
+                      : isFormatWithYear ? FORMAT_YEAR
+                        : FORMAT_HOUR;
         formatStr = isShowYear ? formatStr : formatStr.replace("yyyy-", "");
         format = new SimpleDateFormat(formatStr, Locale.getDefault());
         //是否只显示截止时间
@@ -236,6 +240,7 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
 
                 })
                 .setRangDate(startDate, endDate)
+                .setMinuteInterval(minuteInterval)
                 .setDecorView(decorView)
                 .build();
     }
@@ -370,6 +375,22 @@ public class QzSlideDatePicker extends QzBaseSlideFragment {
     public QzSlideDatePicker formatWithMinute() {
         isFormatWithSecond = false;
         isFormatWithMinute = true;
+        minuteInterval = 1;
+        isFormatWithDay = false;
+        isFormatWithMonth = false;
+        isFormatWithYear = false;
+        return this;
+    }
+
+    /**
+     * 格式化到分（默认到小时）
+     *
+     * @param minIntv 分钟间隔
+     */
+    public QzSlideDatePicker formatWithMinute(int minIntv) {
+        isFormatWithSecond = false;
+        isFormatWithMinute = true;
+        minuteInterval = minIntv;
         isFormatWithDay = false;
         isFormatWithMonth = false;
         isFormatWithYear = false;
