@@ -193,16 +193,18 @@ class EditBorderLayout(
 
     init {
         setWillNotDraw(false)
-        initAttrs(context, attrs, defStyleAttr)
+        initAttrs(context, attrs, defStyleAttr, defStyleRes)
     }
 
     /**
      * 获取自定义属性
      */
-    private fun initAttrs(context: Context, attrs: AttributeSet?, defStyleAttr: Int) {
+    private fun initAttrs(
+        context: Context, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int
+    ) {
         //获取自定义属性。
         context.withStyledAttributes(
-            attrs, R.styleable.EditBorderLayout, defStyleAttr, 0
+            attrs, R.styleable.EditBorderLayout, defStyleAttr, defStyleRes
         ) {
             //边框
             //边框颜色
@@ -370,8 +372,7 @@ class EditBorderLayout(
             //右上角圆角
             if (boxCornerRadius > 0) borderPath.arcTo(
                 RectF(
-                    right - boxCornerRadius * 2, top, right,
-                    top + boxCornerRadius * 2
+                    right - boxCornerRadius * 2, top, right, top + boxCornerRadius * 2
                 ), 270f, 90f, false
             )
             //右下角 - 圆角直径
@@ -379,8 +380,7 @@ class EditBorderLayout(
             //右下角圆角
             if (boxCornerRadius > 0) borderPath.arcTo(
                 RectF(
-                    right - boxCornerRadius * 2, bottom - boxCornerRadius * 2,
-                    right, bottom
+                    right - boxCornerRadius * 2, bottom - boxCornerRadius * 2, right, bottom
                 ), 0f, 90f, false
             )
             //左下角 - 圆角直径
@@ -388,8 +388,7 @@ class EditBorderLayout(
             //左下角圆角
             if (boxCornerRadius > 0) borderPath.arcTo(
                 RectF(
-                    left, bottom - boxCornerRadius * 2,
-                    left + boxCornerRadius * 2, bottom
+                    left, bottom - boxCornerRadius * 2, left + boxCornerRadius * 2, bottom
                 ), 90f, 90f, false
             )
             //左上角 - 圆角直径
@@ -397,9 +396,7 @@ class EditBorderLayout(
             //左上角圆角
             if (boxCornerRadius > 0) borderPath.arcTo(
                 RectF(
-                    left, top,
-                    left + boxCornerRadius * 2,
-                    top + boxCornerRadius * 2
+                    left, top, left + boxCornerRadius * 2, top + boxCornerRadius * 2
                 ), 180f, 90f, false
             )
             //刷新绘制
@@ -554,7 +551,8 @@ class EditBorderLayout(
             hintView?.text = if (isRequired) SpannableStringBuilder(text).apply {
                 setSpan(
                     ForegroundColorSpan(Color.RED),
-                    text.length - 1, text.length,
+                    text.length - 1,
+                    text.length,
                     SpannableStringBuilder.SPAN_EXCLUSIVE_EXCLUSIVE
                 )
             } else text
