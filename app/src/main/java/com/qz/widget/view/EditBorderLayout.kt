@@ -20,12 +20,14 @@ import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.AppCompatTextView
@@ -33,11 +35,9 @@ import androidx.core.widget.addTextChangedListener
 import com.qz.widget.R
 import me.jessyan.autosize.utils.AutoSizeUtils
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.random.Random
 import androidx.core.graphics.toColorInt
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.createBitmap
-import java.lang.Integer.getInteger
 
 
 /**
@@ -47,13 +47,13 @@ import java.lang.Integer.getInteger
  * E-mail : ezhuwx@163.com
  * Update on 9:23 by ezhuwx
  */
-
+@Keep
 class EditBorderLayout(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0, defStyleRes: Int = 0,
     /**
      * 边框颜色
      */
-    private var boxStrokeColor: Int = Color.parseColor("#999999"),
+    private var boxStrokeColor: Int = "#999999".toColorInt(),
 
     /**
      * 边框宽度 px
@@ -62,7 +62,7 @@ class EditBorderLayout(
     /**
      * 边框焦点颜色
      */
-    private var boxStrokeFocusedColor: Int = Color.parseColor("#2269d3"),
+    private var boxStrokeFocusedColor: Int = "#2269d3".toColorInt(),
     /**
      * 边框圆角
      */
@@ -83,7 +83,7 @@ class EditBorderLayout(
     /**
      * 文字颜色
      */
-    private var textStrColor: Int = Color.parseColor("#2269d3"),
+    private var textStrColor: Int = "#2269d3".toColorInt(),
     /**
      * 文字最大行数
      */
@@ -167,16 +167,56 @@ class EditBorderLayout(
     private var onTextChanged: ((String?) -> Unit)? = null,
 ) : RelativeLayout(context, attrs, defStyleAttr, defStyleRes) {
     private var editView: EditText? = null
+
+    /**
+     * 仅查看文字
+     */
     private var textView: TextView? = null
+
+    /**
+     * 提示文字
+     */
     private var hintView: TextView? = null
+
+    /**
+     * 边框路径
+     */
     private val borderPath = Path()
+
+    /**
+     * 边框画笔
+     */
     private lateinit var borderPaint: Paint
+
+    /**
+     * 缓存Bitmap
+     */
     private var cacheBitmap: Bitmap? = null
+
+    /**
+     * 缓存Canvas
+     */
     private var cacheCanvas: Canvas? = null
+
+    /**
+     * Canvas
+     */
     private var realCanvas: Canvas? = null
+
+    /**
+     * 是否需要重新绘制边框
+     */
     private var isNeedBuild = AtomicBoolean(true)
+
+    /**
+     * 提示文字是否在顶部
+     */
     private var isHintOnTop = false
-    private val viewId = Random.nextInt(100000000, 999999999)
+
+    /**
+     * ID
+     */
+    private val viewId = generateViewId()
 
 
     constructor(context: Context) : this(
@@ -192,6 +232,10 @@ class EditBorderLayout(
     )
 
     init {
+        // 禁用三星/系统强制反色，避免底层异步读取属性崩溃
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            isForceDarkAllowed = false
+        }
         setWillNotDraw(false)
         initAttrs(context, attrs, defStyleAttr, defStyleRes)
     }
@@ -443,6 +487,10 @@ class EditBorderLayout(
      * 初始化编辑框
      */
     private fun initEditView() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            //拒绝三星系统Autofill扫描
+            importantForAutofill = IMPORTANT_FOR_AUTOFILL_NO
+        }
         editView = EditText(context).apply {
             id = viewId
             setText(textStr)
