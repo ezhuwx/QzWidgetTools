@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.Chart
+import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
@@ -31,7 +32,7 @@ fun BarChart.initBarChart(
     left: Float = 40f, top: Float = 30f,
     right: Float = 40f, bottom: Float = 40f,
     extraTop: Float = 10f,
-    isLegendEnabled: Boolean = true,
+    isLegendEnabled: Boolean? = null,
     xLabelSel: (Int) -> String?,
     xSubLabelSel: ((Int) -> String?)? = null,
     xColorSel: (Int) -> Int,
@@ -45,8 +46,8 @@ fun BarChart.initBarChart(
     drawRightGridLine: Boolean = false,
     drawRightGridDashedLine: Boolean = false,
 ) {
-    //图例
-    legend.isEnabled = isLegendEnabled
+    //图例(横向柱状图默认不显是图例，避免因绘制区域计算，出现浮点数精确度问题，导致首个柱状图值无法显示)
+    legend.isEnabled = isLegendEnabled ?: (this !is HorizontalBarChart)
     //不展示图表描述信息
     setNoDataText(context.getString(R.string.empty_data))
     setNoDataTextColor(Color.BLACK)
